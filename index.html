@@ -1,136 +1,223 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh‑CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aaaagni | Pink Home</title>
+<meta charset="UTF‑8">
+<meta name="viewport" content="width=device‑width, initial‑scale=1.0">
+<title>Seaside Home | 海滨小站</title>
 <style>
 *{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
+margin: 0;
+padding: 0;
+box‑sizing: border‑box;
+scroll‑behavior: smooth;
 }
+
 body{
-  min-height:100vh;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:
-    radial-gradient(circle at 10% 10%, rgba(255,182,193,0.8), transparent 50%),
-    radial-gradient(circle at 90% 20%, rgba(255,228,235,0.9), transparent 50%),
-    linear-gradient(135deg,#fff0f6,#ffe4ec,#ffd6e0);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
+font‑family:‑apple‑system,BlinkMacSystemFont,"Segoe UI",sans‑serif;
+background: linear‑gradient(160deg, #e6f4ff 0%, #b8e0ff 45%, #74b9f5 100%);
+min‑height: 100vh;
+padding: 40px 18px 120px;
+position: relative;
+overflow‑x:hidden;
 }
+
+/* 海浪动画容器，固定页面底部 */
+.wave‑wrap{
+position: fixed;
+bottom:0;
+left:0;
+width:100%;
+height:100px;
+z‑index:‑1;
+overflow:hidden;
+}
+.wave{
+position:absolute;
+width:200%;
+height:100%;
+left:‑50%;
+background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='%23ffffff' opacity='0.35' d='M0,60 C150,120 350,0 600,60 C850,120 1050,0 1200,60 L1200,120 L0,120 Z'/%3E%3C/svg%3E");
+background‑repeat:repeat‑x;
+background‑size:600px 100px;
+animation: waveMove 12s linear infinite;
+}
+.wave:nth‑child(2){
+bottom:‑10px;
+opacity:0.2;
+animation‑duration:10s;
+animation‑direction:reverse;
+}
+@keyframes waveMove{
+0%{transform:translateX(0);}
+100%{transform:translateX(50%);}
+}
+
 .card{
-  width:100%;
-  max-width:520px;
-  background:rgba(255,255,255,0.78);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border-radius:24px;
-  padding:48px 36px;
-  box-shadow:
-    0 10px 40px rgba(255,105,180,0.25),
-    0 0 0 1px rgba(255,255,255,0.8);
-  text-align:center;
+width:100%;
+max‑width:540px;
+background:rgba(255,255,255,0.82);
+backdrop‑filter: blur(22px);
+‑webkit‑backdrop‑filter: blur(22px);
+border‑radius: 28px;
+padding: 50px 38px;
+box‑shadow: 0 12px 42px rgba(40,120,200,0.16);
+text‑align:center;
+margin:0 auto 45px;
 }
+
 .avatar{
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#ff9bb4,#ff66a3);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin:0 auto 24px;
-  font-size:48px;
-  box-shadow:0 8px 20px rgba(255,105,180,0.35);
+width:124px;
+height:124px;
+border‑radius:50%;
+background:linear‑gradient(135deg,#ffdd67,#ffc82e);
+display:flex;
+align‑items:center;
+justify‑content:center;
+margin:0 auto 26px;
+font‑size:52px;
+box‑shadow:0 8px 22px rgba(255,200,46,0.32);
 }
+
 h1{
-  font-size:36px;
-  color:#d63384;
-  margin-bottom:8px;
+font‑size:36px;
+color:#1967b3;
+margin‑bottom:10px;
 }
+
 .sub{
-  color:#ff8fab;
-  font-size:18px;
-  margin-bottom:24px;
+color:#4488cc;
+font‑size:18px;
+margin‑bottom:30px;
 }
+
 .line{
-  width:60px;
-  height:4px;
-  background:linear-gradient(90deg,#ff9bb4,#ff66a3);
-  border-radius:2px;
-  margin:0 auto 28px;
+width:70px;
+height:4px;
+background:linear‑gradient(90deg,#74b9f5,#ffd033);
+border‑radius:3px;
+margin:0 auto 30px;
 }
+
 p{
-  color:#6b7280;
-  font-size:16px;
-  line-height:1.8;
-  margin-bottom:14px;
+color:#3c5b7c;
+font‑size:16px;
+line‑height:1.85;
+margin‑bottom:15px;
 }
+
 .links{
-  margin-top:32px;
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  justify-content:center;
+margin‑top:34px;
+display:flex;
+gap:14px;
+flex‑wrap:wrap;
+justify‑content:center;
 }
+
 .links a{
-  text-decoration:none;
-  background:linear-gradient(135deg,#ff9bb4,#ff66a3);
-  color:white;
-  padding:12px 24px;
-  border-radius:999px;
-  font-weight:500;
-  transition:0.3s;
-  box-shadow:0 4px 12px rgba(255,105,180,0.3);
+text‑decoration:none;
+background:linear‑gradient(135deg,#57a8f0,#2888dd);
+color:#ffffff;
+padding:13px 26px;
+border‑radius:999px;
+font‑size:17px;
+font‑weight:500;
+transition:0.3s ease;
+box‑shadow:0 5px 14px rgba(40,136,221,0.28);
 }
+
 .links a:hover{
-  transform:translateY(-3px);
-  box-shadow:0 8px 20px rgba(255,105,180,0.45);
+transform: translateY(-4px);
+box‑shadow:0 10px 24px rgba(40,136,221,0.38);
 }
-.deco{
-  position:absolute;
-  width:20px;
-  height:20px;
-  background:rgba(255,255,255,0.6);
-  border-radius:50%;
-  animation:float 6s infinite ease-in-out;
+
+.section{
+max‑width:540px;
+margin:65px auto;
+background:rgba(255,255,255,0.78);
+backdrop‑filter: blur(20px);
+border‑radius:26px;
+padding:38px 32px;
 }
-@keyframes float{
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-15px);}
+
+.section h2{
+color:#1967b3;
+margin‑bottom:22px;
+font‑size:25px;
+text‑align:center;
 }
-@media(max-width:480px){
-  .card{
-    padding:36px 24px;
-  }
-  h1{
-    font-size:28px;
-  }
+
+.item{
+background:#f0f8ff;
+border‑radius:16px;
+padding:20px;
+margin‑bottom:18px;
+text‑align:left;
+border‑left:5px solid #ffd033;
+}
+
+.item h3{
+color:#2472bb;
+margin‑bottom:8px;
+}
+
+.back‑top{
+display:block;
+text‑align:center;
+margin‑top:26px;
+color:#2888dd;
+text‑decoration:none;
+font‑weight:500;
+}
+
+@media (max‑width:480px){
+.card,.section{
+padding:34px 22px;
+}
+h1{font‑size:29px;}
+.wave‑wrap{height:80px;}
 }
 </style>
 </head>
 <body>
-  <div class="deco" style="top:10%;left:15%;animation-delay:0s;"></div>
-  <div class="deco" style="top:20%;right:20%;animation-delay:1s;"></div>
-  <div class="deco" style="bottom:15%;left:25%;animation-delay:2s;"></div>
+<!-- 动态海浪背景层 -->
+<div class="wave‑wrap">
+<div class="wave"></div>
+<div class="wave"></div>
+</div>
 
-  <div class="card">
-    <div class="avatar">🌸</div>
-    <h1>Aaaagni</h1>
-    <div class="sub">Welcome to my pink world</div>
-    <div class="line"></div>
-    <p>这里是我的个人小站，记录学习、项目和生活碎片。</p >
-    <p>希望每天都有一点进步，也希望你会喜欢这里✨</p >
+<div class="card" id="home">
+<div class="avatar">☀️</div>
+<h1>Aaaagni</h1>
+<div class="sub">Seaside Vacation · 海滨小站</div>
+<div class="line"></div>
+<p>海风与晴空，在这里记录学习、项目与生活碎片。</p >
+<p>希望你拥有愉快的浏览时光🌊</p >
+<div class="links">
+<a href=" " target="_blank">GitHub</a >
+<a href="#project">项目展示</a >
+<a href="#about">关于我</a >
+</div>
+</div>
 
-    <div class="links">
-      <a href=" " target="_blank">GitHub</a >
-      <a href="#">项目展示</a >
-      <a href="#">关于我</a >
-    </div>
-  </div>
+<div class="section" id="project">
+<h2>🌊 项目展示</h2>
+<div class="item">
+<h3>海滨风个人主页</h3>
+<p>GitHub Pages搭建，带流动海浪动画，蓝白海滨度假风格网站。</p >
+</div>
+<div class="item">
+<h3>待新增项目</h3>
+<p>后续在这里填入你的作品、练习项目。</p >
+</div>
+<a class="back‑top" href="#home">↑ 返回顶部</a >
+</div>
+
+<div class="section" id="about">
+<h2>🏖️ 关于我</h2>
+<p>喜欢代码、前端设计，享受不断学习新东西的过程。</p >
+<p>向往海边，喜欢清爽简单的事物，持续向前慢慢成长。</p >
+<a class="back‑top" href="#home">↑ 返回顶部</a >
+</div>
+
 </body>
 </html>
