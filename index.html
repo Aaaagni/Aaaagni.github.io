@@ -20,7 +20,291 @@ padding: 40px 18px 120px;
 position: relative;
 overflow-x:hidden;
 }
+/* ================================
+   Seaside Dynamic Effects
+   ================================ */
 
+.dynamic-seaside {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ---------- Clouds ---------- */
+
+.cloud {
+    position: absolute;
+    width: 150px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.55);
+    border-radius: 50px;
+    filter: blur(2px);
+    animation: cloudMove linear infinite;
+}
+
+.cloud::before,
+.cloud::after {
+    content: "";
+    position: absolute;
+    background: inherit;
+    border-radius: 50%;
+}
+
+.cloud::before {
+    width: 65px;
+    height: 65px;
+    left: 25px;
+    bottom: 10px;
+}
+
+.cloud::after {
+    width: 85px;
+    height: 85px;
+    right: 20px;
+    bottom: 5px;
+}
+
+.cloud-1 {
+    top: 12%;
+    left: -180px;
+    animation-duration: 55s;
+}
+
+.cloud-2 {
+    top: 25%;
+    left: -250px;
+    transform: scale(0.7);
+    opacity: 0.6;
+    animation-duration: 75s;
+    animation-delay: -25s;
+}
+
+.cloud-3 {
+    top: 8%;
+    left: -300px;
+    transform: scale(0.5);
+    opacity: 0.45;
+    animation-duration: 90s;
+    animation-delay: -50s;
+}
+
+@keyframes cloudMove {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(calc(100vw + 500px));
+    }
+}
+
+/* ---------- Birds ---------- */
+
+.bird {
+    position: absolute;
+    color: rgba(30, 60, 80, 0.45);
+    font-size: 35px;
+    font-weight: bold;
+    animation: birdFly linear infinite;
+}
+
+.bird-1 {
+    top: 18%;
+    left: -80px;
+    animation-duration: 18s;
+}
+
+.bird-2 {
+    top: 30%;
+    left: -120px;
+    font-size: 25px;
+    animation-duration: 25s;
+    animation-delay: -8s;
+}
+
+.bird-3 {
+    top: 12%;
+    left: -100px;
+    font-size: 20px;
+    animation-duration: 30s;
+    animation-delay: -15s;
+}
+
+@keyframes birdFly {
+    0% {
+        transform: translateX(0) translateY(0);
+    }
+
+    25% {
+        transform: translateX(25vw) translateY(-20px);
+    }
+
+    50% {
+        transform: translateX(50vw) translateY(10px);
+    }
+
+    75% {
+        transform: translateX(75vw) translateY(-15px);
+    }
+
+    100% {
+        transform: translateX(110vw) translateY(0);
+    }
+}
+
+/* ---------- Particles ---------- */
+
+.particles {
+    position: absolute;
+    inset: 0;
+}
+
+.particle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    animation: floatParticle linear infinite;
+}
+
+@keyframes floatParticle {
+    0% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 0.8;
+    }
+
+    80% {
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: translateY(-10vh);
+        opacity: 0;
+    }
+}
+
+/* ---------- Waves ---------- */
+
+.waves {
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 130px;
+}
+
+.wave {
+    position: absolute;
+    left: -10%;
+    width: 120%;
+    height: 100px;
+    border-radius: 50% 50% 0 0;
+}
+
+.wave-1 {
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.35);
+    animation: waveMove 7s ease-in-out infinite;
+}
+
+.wave-2 {
+    bottom: -20px;
+    background: rgba(255, 255, 255, 0.22);
+    animation: waveMove 10s ease-in-out infinite reverse;
+}
+
+.wave-3 {
+    bottom: -40px;
+    background: rgba(255, 255, 255, 0.15);
+    animation: waveMove 14s ease-in-out infinite;
+}
+
+@keyframes waveMove {
+    0%, 100% {
+        transform: translateX(-3%) scaleY(1);
+    }
+
+    50% {
+        transform: translateX(3%) scaleY(0.8);
+    }
+}
+
+/* ---------- Mouse Glow ---------- */
+
+.mouse-glow {
+    position: fixed;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.16),
+        transparent 70%
+    );
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    transition: opacity 0.3s ease;
+}
+
+/* ---------- Card Hover ---------- */
+
+.card,
+.project-card,
+.about-card {
+    transition:
+        transform 0.35s ease,
+        box-shadow 0.35s ease;
+}
+
+.card:hover,
+.project-card:hover,
+.about-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow:
+        0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 768px) {
+
+    .mouse-glow {
+        display: none;
+    }
+
+    .cloud {
+        opacity: 0.35;
+    }
+
+    .bird {
+        transform: scale(0.7);
+    }
+
+    .waves {
+        height: 90px;
+    }
+}
+
+/* ---------- Reduced Motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
 .card{
 width:100%;
 max-width:540px;
@@ -203,6 +487,32 @@ h1{font-size:29px;}
 <p>向往山海与夏天，喜欢清爽简单的事物，持续向前慢慢成长🫶</p >
 <a class="back-top" href="#home">↑ 返回顶部</a >
 </div>
+
+<!-- ===== Seaside Dynamic Background ===== -->
+<div class="dynamic-seaside">
+    <!-- Clouds -->
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+
+    <!-- Birds -->
+    <div class="bird bird-1">⌁</div>
+    <div class="bird bird-2">⌁</div>
+    <div class="bird bird-3">⌁</div>
+
+    <!-- Floating particles -->
+    <div class="particles"></div>
+
+    <!-- Waves -->
+    <div class="waves">
+        <div class="wave wave-1"></div>
+        <div class="wave wave-2"></div>
+        <div class="wave wave-3"></div>
+    </div>
+</div>
+
+<!-- Mouse glow -->
+<div class="mouse-glow"></div>
 
 </body>
 </html>
