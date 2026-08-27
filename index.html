@@ -513,6 +513,39 @@ h1{font-size:29px;}
 
 <!-- Mouse glow -->
 <div class="mouse-glow"></div>
+<script>
+const mouseGlow = document.querySelector(".mouse-glow");
 
+document.addEventListener("mousemove", (event) => {
+    if (mouseGlow) {
+        mouseGlow.style.left = `${event.clientX}px`;
+        mouseGlow.style.top = `${event.clientY}px`;
+    }
+});
+
+const particleContainer = document.querySelector(".particles");
+
+if (particleContainer) {
+    for (let i = 0; i < 35; i++) {
+        const particle = document.createElement("div");
+
+        particle.classList.add("particle");
+
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.animationDuration =
+            `${8 + Math.random() * 12}s`;
+        particle.style.animationDelay =
+            `${Math.random() * -15}s`;
+
+        const size = 2 + Math.random() * 5;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+
+        particleContainer.appendChild(particle);
+    }
+}
+</script>
+</body>
+</html>
 </body>
 </html>
