@@ -22,30 +22,42 @@ overflow-x:hidden;
 }
 
 /* 海浪动画容器，固定页面底部 */
-.wave-wrap{
-position: fixed;
-bottom:0;
-left:0;
-width:100%;
-height:100px;
-z-index:-1;
-overflow:hidden;
+.wave-wrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 180px;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
 }
-.wave{
-position:absolute;
-width:250%;
-height:100%;
-left:-75%;
-background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='%23ffffff' opacity='0.35' d='M0,60 C150,120 350,0 600,60 C850,120 1050,0 1200,60 L1200,120 L0,120 Z'/%3E%3C/svg%3E");
-background-repeat:repeat-x;
-background-size:600px 100px;
-animation: waveMove 12s linear infinite;
+
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  left: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='%23ffffff' opacity='0.35' d='M0,60 C200,110 400,10 600,60 C800,110 1000,10 1200,60 L1200,120 L0,120 Z'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 600px 120px;
+  animation: waveMove 12s linear infinite;
 }
-.wave:nth-child(2){
-bottom:-10px;
-opacity:0.2;
-animation-duration:10s;
-animation-direction:reverse;
+
+.wave:nth-child(2) {
+  bottom: 0;
+  opacity: 0.2;
+  animation-duration: 10s;
+  animation-direction: reverse;
+}
+
+@keyframes waveMove {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-600px);
+  }
 }
 @keyframes waveMove{
 0%{transform:translateX(0);}
