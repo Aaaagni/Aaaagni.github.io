@@ -209,6 +209,7 @@
     margin-bottom:6px; word-break:break-all;
   }
   .note-card .who::before{ content:"♪ "; color:var(--pink-deep); }
+  .note-card .who .rel{ font-size:9px; font-weight:400; color:#a55; }
   .note-card .device{
     font-size:9px; color:#777; margin-bottom:5px;
     letter-spacing:1px; word-break:break-all;
@@ -370,6 +371,12 @@
       <input id="name" type="text" maxlength="20" placeholder="如：路过的候鸟">
     </div>
     <div>
+      <label>関係 / 与我的关系</label>
+      <input id="relation" type="text" maxlength="20" placeholder="如：同学 / 朋友（选填）">
+    </div>
+  </div>
+  <div class="row">
+    <div>
       <label>端末 / 使用设备</label>
       <input id="device" type="text" maxlength="40" placeholder="自动检测中…" readonly>
     </div>
@@ -377,7 +384,7 @@
   <label>ご意見 / 意见</label>
   <textarea id="text" maxlength="200" placeholder="写点什么…(´｡• ω •｡`)\n例如：天台的麻雀今天也在发呆！"></textarea>
   <button class="postbtn" id="postBtn">📌 貼る!! 贴上便签</button>
-  <div class="hint-note">※ 已配置 Supabase 云同步：便签全站共享；否则通过 server.py 运行时写入 guestbook-data.json；以上都没有则仅保存在本机浏览器</div>
+  <div class="hint-note">※ 已配置 Supabase 云同步（feedback 表）：访客可提交，站长解锁后查看/删除；离线时仅保存在本机浏览器</div>
 </section>
 
 <footer>
@@ -389,7 +396,7 @@
 <script>
 /* ================= 便签数据源（按优先级） =================
  * 1) Supabase 云同步（免费）：配置下面两项后，GitHub Pages 上所有访客共享留言
- * 2) 本地服务器 server.py：/api/notes 写入 guestbook-data.json
+ * 2) 本地服务器 server.py：/api/notes 写入 guestbook-data.json（仅本地调试）
  * 3) localStorage：以上都不可用时仅保存于本机浏览器
  * 将 SUPABASE_URL / SUPABASE_ANON_KEY 留空即可关闭云同步 */
 var SUPABASE_URL = 'https://dpzfriukylmnxistcopd.supabase.co';  // Supabase Project URL
@@ -421,9 +428,10 @@ function saveLocal(){
 }
 function boot(){
   if (SUPABASE_URL && SUPABASE_ANON_KEY){
-    /* 云同步模式：直接读 Supabase */
+    /* v3 云模式：访客只能提交（INSERT），读取仅限站长解锁后经 RPC，
+       所以启动时不做匿名 select —— 直接锁屏，解锁时再拉取 */
     mode = 'cloud';
-    loadFromCloud();
+    lockBoard();
   } else {
     /* 本地服务器模式 → 失败降级 localStorage */
     fetch('/api/notes', {cache:'no-store'})
@@ -442,10 +450,14 @@ function boot(){
 }
 
 /* ================= Supabase 云同步 ================= */
-/* 意见数据表：个人网页意见（中文表名，REST 路径需 URL 编码） */
-var CLOUD_TABLE = encodeURIComponent('个人网页意见');
+/* v3 方案：feedback 表（7 字段），访客只能 INSERT，站长经 RPC 读取/删除 */
+var CLOUD_TABLE = 'feedback';
+var FB_VERSION = 'v3';   /* 页面/方案版本号，随留言写入 version 字段 */
 function apiBase(){
   return SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/' + CLOUD_TABLE;
+}
+function rpcUrl(fn){
+  return SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/rpc/' + fn;
 }
 function cloudHeaders(){
   return {
@@ -462,7 +474,16 @@ function fmtTime(iso){
   }catch(e){ return ''; }
 }
 function cloudToNote(r){
-  return { id: r.id, name: r.name, text: r.content, device: r.device || '未知设备', color: r.color, rot: r.rot, time: fmtTime(r.created_at) };
+  return {
+    id: r.id,
+    name: r.name,
+    relation: r.relation || '',
+    text: r.message,
+    device: r.device || '未知设备',
+    color: r.color || COLORS[Math.floor(Math.random() * COLORS.length)],
+    rot: r.rot || (Math.random() * 6 - 3).toFixed(1),
+    time: fmtTime(r.created_at)
+  };
 }
 /* ================= 锁屏（仅云模式启用） ================= */
 function lockBoard(){
@@ -486,52 +507,32 @@ function doUnlock(){
   var errEl = document.getElementById('lockErr');
   var pw = pwEl ? pwEl.value.trim() : '';
   if (!pw){ return; }
-  fetch(SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/rpc/check_admin_password', {
+  fetch(rpcUrl('check_admin_password'), {
     method: 'POST',
     headers: cloudHeaders(),
     body: JSON.stringify({ admin_password: pw })
   })
   .then(function(r){ if(!r.ok) throw new Error('rpc'); return r.json(); })
   .then(function(ok){
-    if (ok === true){
-      if (errEl) errEl.hidden = true;
-      unlockBoard();
-    } else {
-      if (errEl) errEl.hidden = false;
-    }
-  })
-  .catch(function(){
-    toast('⚠ 无法校验密码（网络或服务配置问题）');
-    if (errEl) errEl.hidden = false;
-  });
-}
-function loadFromCloud(){
-  fetch(apiBase() + '?select=id,name,content,device,color,rot,created_at&order=created_at.desc&limit=200',
-        { headers: cloudHeaders(), cache: 'no-store' })
-    .then(function(r){ if(!r.ok) throw new Error('supabase'); return r.json(); })
-    .then(function(list){
-      notes = (list || []).map(cloudToNote);
-      lockBoard();   /* 仅站长可见：先锁板，输入密码后才渲染便签 */
-    })
-    .catch(function(){
-      /* 云端失败：降级读取随站点部署的静态 guestbook-data.json，最后才用 localStorage
-         注意：降级数据同样必须锁屏，保证「仅站长可见」不被绕过 */
-      fetch('guestbook-data.json', {cache:'no-store'})
-        .then(function(r){ if(!r.ok) throw new Error('static'); return r.json(); })
-        .then(function(d){
-          mode = 'server';
-          var list = Array.isArray(d) ? d : ((d && d.notes) || []);
-          notes = list.slice();
-          lockBoard();   /* 锁屏（即使云端暂时不可用） */
-          toast('⚠ 云端暂不可用，已加载静态备份（仍仅站长可见）');
-        })
-        .catch(function(){
-          mode = 'local';
-          notes = loadLocal();
-          lockBoard();   /* 锁屏（即使云端暂时不可用） */
-          toast('⚠ 云端留言同步失败，已切换为本机模式（仍仅站长可见）');
-        });
+    if (ok !== true){ throw new Error('badpw'); }
+    /* 密码正确：经站长 RPC 拉取全部留言（anon 无 select 权限，只能走这里） */
+    return fetch(rpcUrl('get_feedback'), {
+      method: 'POST',
+      headers: cloudHeaders(),
+      body: JSON.stringify({ admin_password: pw })
     });
+  })
+  .then(function(r){ if(!r.ok) throw new Error('rpc'); return r.json(); })
+  .then(function(list){
+    notes = (list || []).map(cloudToNote);
+    if (errEl) errEl.hidden = true;
+    unlockBoard();
+  })
+  .catch(function(e){
+    var badpw = e && e.message === 'badpw';
+    if (errEl) errEl.hidden = !badpw;   /* 密码错显示红色提示；网络错走 toast */
+    if (!badpw) toast('⚠ 云端暂不可用，解锁失败（请确认网络可访问 supabase.co）');
+  });
 }
 
 /* ================= 设备检测 ================= */
@@ -617,7 +618,7 @@ function makeNote(n, i, isNew, p){
     '<span class="tape"></span>' +
     '<span class="pin"></span>' +
     '<button class="del" data-id="' + esc(String(n.id)) + '" title="删除便签">×</button>' +
-    '<div class="who">' + esc(n.name) + '</div>' +
+    '<div class="who">' + esc(n.name) + (n.relation ? ' <span class="rel">(' + esc(n.relation) + ')</span>' : '') + '</div>' +
     '<div class="device">' + esc(n.device || '未知设备') + '</div>' +
     '<div class="body">' + esc(n.text) + '</div>' +
     '<div class="time">' + esc(n.time) + '</div>';
@@ -636,8 +637,15 @@ function delNote(n){
   var pw = window.prompt('站长验证：删除「' + name + '」的便签需要密码。\n请输入站长密码：');
   if (pw === null) return;                    /* 取消 */
   if (!pw.trim()){ toast('⚠ 未输入密码'); return; }
+  if (mode === 'cloud' && String(n.id).indexOf('tmp-') === 0){
+    /* 临时便签（乐观显示，云端尚无记录）：直接本地移除即可 */
+    notes = notes.filter(function(x){ return String(x.id) !== String(n.id); });
+    render();
+    toast('✂ 已移除刚提交的便签（云端数据不受影响）');
+    return;
+  }
   if (mode === 'cloud'){
-    /* 云端：调用 Supabase RPC（服务端校验密码，删除"个人网页意见"表中的记录） */
+    /* 云端：调用 Supabase RPC（服务端校验密码，删除 feedback 表中的记录） */
     fetch(SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/rpc/delete_feedback', {
       method: 'POST',
       headers: cloudHeaders(),
@@ -704,17 +712,25 @@ function post(){
   };
 
   if (mode === 'cloud'){
-    /* 云同步模式：POST 写入 Supabase，全站共享 */
+    /* v3 云模式：INSERT 写入 feedback 表（RLS 仅允许写入），全站共享
+       注意：不带 Prefer return=representation —— anon 无 SELECT 权限，
+       PostgREST 无法返回插入行（会 401），只判断是否写入成功即可 */
+    var relationEl = document.getElementById('relation');
+    var relation = relationEl ? relationEl.value.trim() : '';
     fetch(apiBase(), {
       method: 'POST',
-      headers: Object.assign(cloudHeaders(), {Prefer: 'return=representation'}),
-      body: JSON.stringify({ name: name, content: text, device: note.device, color: note.color, rot: note.rot })
+      headers: cloudHeaders(),
+      body: JSON.stringify({ name: name, relation: relation, device: note.device, message: text, version: FB_VERSION })
     })
-    .then(function(r){ if(!r.ok) throw new Error('api'); return r.json(); })
-    .then(function(list){
-      var inserted = (list && list[0]) || null;
-      if (inserted) notes.unshift(cloudToNote(inserted));
-      render();
+    .then(function(r){ if(!r.ok) throw new Error('api'); })
+    .then(function(){
+      /* 云端写入成功：若站长已解锁则乐观显示新便签（临时 id，刷新后由 RPC 拉到正式数据） */
+      var lock = document.getElementById('lockOverlay');
+      if (lock && lock.hidden){
+        note.id = 'tmp-' + Date.now();
+        notes.unshift(note);
+        render();
+      }
       nameEl.value = ''; textEl.value = '';
       pluck();
       toast('✓ 已收到您的意见（站长解锁后可见）');
