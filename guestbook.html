@@ -173,6 +173,15 @@
     box-shadow:inset -2px -2px 0 rgba(0,0,0,.25), inset 2px 2px 0 rgba(255,255,255,.45);
     z-index:3;
   }
+  .note-card .del{
+    position:absolute; top:2px; right:2px;
+    width:18px; height:18px; line-height:15px;
+    border:0; padding:0; cursor:pointer;
+    background:transparent; color:rgba(74,74,74,.38);
+    font-family:inherit; font-size:14px; font-weight:900;
+    border-radius:50%; z-index:4; transition:all .15s;
+  }
+  .note-card .del:hover{ background:#ff5252; color:#fff; transform:scale(1.15); }
   /* 便签底色 */
   .c-yellow{ background:#fff3a6; }
   .c-pink{ background:#ffd3e0; }
@@ -326,7 +335,14 @@ boot();
 function loadLocal(){
   try{
     var raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw){
+      var arr = JSON.parse(raw);
+      /* 给没有 id 的旧便签补上唯一 id，保证删除能精确定位 */
+      return (arr || []).map(function(n, i){
+        if (n && !n.id) n.id = 'l' + Date.now() + i + Math.random().toString(36).slice(2, 6);
+        return n;
+      });
+    }
   }catch(e){ /* file:// 等受限环境则使用内存 */ }
   return [];
 }
@@ -387,25 +403,58 @@ function loadFromCloud(){
       render();
     })
     .catch(function(){
-      mode = 'local';
-      notes = loadLocal();
-      render();
-      toast('⚠ 云端留言同步失败，已切换为本机模式');
+      /* 云端失败：降级读取随站点部署的静态 guestbook-data.json，最后才用 localStorage */
+      fetch('guestbook-data.json', {cache:'no-store'})
+        .then(function(r){ if(!r.ok) throw new Error('static'); return r.json(); })
+        .then(function(d){
+          mode = 'server';
+          var list = Array.isArray(d) ? d : ((d && d.notes) || []);
+          notes = list.slice();
+          render();
+          toast('⚠ 云端同步失败，已显示静态数据中的便签');
+        })
+        .catch(function(){
+          mode = 'local';
+          notes = loadLocal();
+          render();
+          toast('⚠ 云端留言同步失败，已切换为本机模式');
+        });
     });
 }
 
-/* ================= 渲染毛毡板（新便签叠在旧便签上面） ================= */
+/* ================= 渲染毛毡板（网格铺开，互不重叠） ================= */
 function hashStr(s){
   var h = 5381;
   for (var i = 0; i < s.length; i++){ h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; }
   return h;
 }
-/* 同一张便签每次刷新位置稳定（由 id 派生），叠放更自然 */
-function posFor(id){
-  var h = hashStr(String(id));
-  var x = 2 + (h % 1000) / 1000 * 78;            // 2% ~ 80%，铺满整块板
-  var y = 4 + ((h >>> 10) % 1000) / 1000 * 50;   // 4% ~ 54%
-  return {x: x.toFixed(1), y: y.toFixed(1)};
+/* 把便签铺在毛毡板的网格格子上：
+ * - 列数 = 板宽 ÷ 便签尺寸，天然保证不重叠
+ * - 格子分配顺序由 id 哈希决定，刷新后位置保持稳定
+ * - 每格内做微小随机偏移，保留"随手贴"的毛毡感 */
+function layoutNotes(list){
+  var board = document.getElementById('board');
+  if (!list || !list.length) return {};
+  var isNarrow = board.clientWidth < 520;
+  var noteW = isNarrow ? 150 : 168;   /* 与 .note-card 宽度一致 */
+  var noteH = 148, gapX = 22, gapY = 40;  /* 格间距：留出 hover 放大与长留言的空间 */
+  var padL = 26, padT = 42, padB = 46;
+  var cellW = noteW + gapX, cellH = noteH + gapY;
+  var cols = Math.max(1, Math.floor((board.clientWidth - padL * 2 + gapX) / cellW));
+  cols = Math.min(cols, list.length);
+  var rows = Math.ceil(list.length / cols);
+  /* 按 id 哈希稳定排序，依次占用格子 */
+  var order = list.map(function(n, i){ return { i: i, h: hashStr(String(n.id || ('n' + i))) }; });
+  order.sort(function(a, b){ return a.h - b.h; });
+  var pos = {};
+  order.forEach(function(o, k){
+    var r = Math.floor(k / cols), c = k % cols;
+    var dx = (o.h % 18) - 9;            /* 格内小偏移，不越界 */
+    var dy = ((o.h >>> 8) % 18) - 9;
+    pos[o.i] = { x: padL + c * cellW + dx, y: padT + r * cellH + dy };
+  });
+  board.style.minHeight = Math.max(430, padT + rows * cellH + padB) + 'px';
+  return pos;
 }
 function render(){
   var board = document.getElementById('board');
@@ -414,30 +463,83 @@ function render(){
   var plate = board.querySelector('.plate');
   board.querySelectorAll('.note-card').forEach(function(n){ n.remove(); });
   if (plate) board.appendChild(plate);
+  var pos = layoutNotes(notes);
   notes.forEach(function(n, i){
-    board.insertBefore(makeNote(n, i, i === 0), plate);
+    board.insertBefore(makeNote(n, i, i === 0, pos[i]), plate);
   });
-  /* 板高度随便签数量增长，给随机分布留空间 */
-  board.style.minHeight = Math.max(500, 160 + notes.length * 85) + 'px';
   document.getElementById('count').textContent = notes.length;
 }
 
-function makeNote(n, i, isNew){
+function makeNote(n, i, isNew, p){
   var card = document.createElement('div');
   card.className = 'note-card ' + (n.color || 'c-yellow');
-  var p = posFor(n.id || (i + '-' + Math.random()));
-  card.style.setProperty('--x', p.x + '%');
-  card.style.setProperty('--y', p.y + '%');
+  p = p || { x: 26, y: 42 };
+  card.style.setProperty('--x', p.x + 'px');
+  card.style.setProperty('--y', p.y + 'px');
   card.style.setProperty('--rot', (n.rot || '0') + 'deg');
   card.style.zIndex = 100 + (notes.length - i);   /* 越新越靠上 */
   card.innerHTML =
     '<span class="tape"></span>' +
     '<span class="pin"></span>' +
+    '<button class="del" data-id="' + esc(String(n.id)) + '" title="删除便签">×</button>' +
     '<div class="who">' + esc(n.name) + '</div>' +
     '<div class="body">' + esc(n.text) + '</div>' +
     '<div class="time">' + esc(n.time) + '</div>';
   if (isNew) card.classList.add('stick');
+  card.querySelector('.del').addEventListener('click', function(ev){
+    ev.stopPropagation();
+    delNote(n);
+  });
   return card;
+}
+
+/* ================= 删除留言（站长密码模式） ================= */
+function delNote(n){
+  if (!n || !n.id){ toast('⚠ 无法定位这条便签'); return; }
+  var name = n.name || '匿名';
+  var pw = window.prompt('站长验证：删除「' + name + '」的便签需要密码。\n请输入站长密码：');
+  if (pw === null) return;                    /* 取消 */
+  if (!pw.trim()){ toast('⚠ 未输入密码'); return; }
+  if (mode === 'cloud'){
+    /* 云端：调用 Supabase RPC（服务端校验密码） */
+    fetch(SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/rpc/delete_note', {
+      method: 'POST',
+      headers: cloudHeaders(),
+      body: JSON.stringify({ note_id: n.id, admin_password: pw.trim() })
+    })
+    .then(function(r){
+      if (!r.ok) return r.json().then(function(b){ throw new Error((b && b.message) || ('HTTP ' + r.status)); });
+      return r.json();
+    })
+    .then(function(ok){
+      if (ok === true){
+        notes = notes.filter(function(x){ return String(x.id) !== String(n.id); });
+        render();
+        toast('✂ 已删除「' + name + '」的便签');
+      } else {
+        toast('⚠ 删除失败：密码错误或便签不存在');
+      }
+    })
+    .catch(function(e){
+      toast('⚠ 删除失败：' + (e && e.message ? e.message : '云端接口错误'));
+    });
+  } else if (mode === 'server'){
+    /* 本地服务器：调用 DELETE /api/notes */
+    fetch('/api/notes?id=' + encodeURIComponent(n.id), { method: 'DELETE', cache: 'no-store' })
+    .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(d){
+      notes = (d && d.notes) || notes.filter(function(x){ return String(x.id) !== String(n.id); });
+      render();
+      toast('✂ 已删除「' + name + '」的便签');
+    })
+    .catch(function(){ toast('⚠ 删除失败：本地服务器接口错误'); });
+  } else {
+    /* 本机模式：直接删 localStorage */
+    notes = notes.filter(function(x){ return String(x.id) !== String(n.id); });
+    saveLocal();
+    render();
+    toast('✂ 已删除「' + name + '」的便签（仅本机）');
+  }
 }
 
 function esc(s){
@@ -456,6 +558,7 @@ function post(){
   var now = new Date();
   var pad = function(n){ return n < 10 ? '0' + n : n; };
   var note = {
+    id: 'l' + Date.now() + Math.random().toString(36).slice(2, 6),
     name: name,
     text: text,
     time: (now.getMonth()+1) + '/' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()),

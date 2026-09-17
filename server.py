@@ -111,6 +111,30 @@ class Handler(SimpleHTTPRequestHandler):
         save_notes(notes)
         self._json({"ok": True, "notes": notes})
 
+    # ---------- DELETE ----------
+    def do_DELETE(self):
+        if urlparse(self.path).path != "/api/notes":
+            self._json({"ok": False, "error": "not found"}, 404)
+            return
+        query = urlparse(self.path).query
+        params = {}
+        for pair in query.split("&"):
+            if "=" in pair:
+                k, v = pair.split("=", 1)
+                params[k] = v
+        note_id = params.get("id", "")
+        if not note_id:
+            self._json({"ok": False, "error": "id required"}, 400)
+            return
+        notes = load_notes()
+        before = len(notes)
+        notes = [n for n in notes if str(n.get("id")) != note_id]
+        if len(notes) == before:
+            self._json({"ok": False, "error": "note not found"}, 404)
+            return
+        save_notes(notes)
+        self._json({"ok": True, "notes": notes})
+
     def log_message(self, fmt, *args):
         pass  # 安静模式，日志由启动端重定向
 
