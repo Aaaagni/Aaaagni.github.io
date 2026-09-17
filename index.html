@@ -678,7 +678,7 @@ var BASS = [
 ];
 var TOTAL = 24 * BEAT;
 
-var ctx = null, master = null, isPlaying = false, muted = false, rafId = null;
+var ctx = null, master = null, isPlaying = false, muted = false, rafId = null, loopTimer = null;
 
 function ensureCtx(){
   if (!ctx){
@@ -713,11 +713,13 @@ function scheduleLoop(){
     tone(NOTE[n[0]], tb, n[1]*BEAT*0.95, 'triangle', 0.05);
     tb += n[1]*BEAT;
   });
+  /* 循环调度：本轮播完前 0.2s 排下一轮，音乐永不间断 */
+  loopTimer = setTimeout(scheduleLoop, TOTAL * 1000 - 200);
 }
 function startLoop(){
   if (!ensureCtx()) return;
+  if (loopTimer) clearTimeout(loopTimer);
   scheduleLoop();
-  scheduleLoop(); // 预调度两轮，避免间隙
   isPlaying = true;
   document.getElementById('reelL').classList.add('spin');
   document.getElementById('reelR').classList.add('spin');
@@ -725,6 +727,7 @@ function startLoop(){
   if (!rafId) tick();
 }
 function pauseLoop(){
+  if (loopTimer){ clearTimeout(loopTimer); loopTimer = null; }
   if (ctx && ctx.state === 'running') ctx.suspend();
   isPlaying = false;
   document.getElementById('reelL').classList.remove('spin');
@@ -740,7 +743,7 @@ function tick(){
 document.getElementById('playBtn').addEventListener('click', function(){
   if (isPlaying){ pauseLoop(); }
   else{
-    if (ctx && ctx.state === 'suspended' && ctx.currentTime > 0){ ctx.resume(); isPlaying = true; document.getElementById('reelL').classList.add('spin'); document.getElementById('reelR').classList.add('spin'); document.getElementById('playBtn').textContent = '⏸ PAUSE'; }
+    if (ctx && ctx.state === 'suspended' && ctx.currentTime > 0){ ctx.resume(); isPlaying = true; document.getElementById('reelL').classList.add('spin'); document.getElementById('reelR').classList.add('spin'); document.getElementById('playBtn').textContent = '⏸ PAUSE'; var remainMs = TOTAL*1000 - ((ctx.currentTime % TOTAL)*1000); loopTimer = setTimeout(scheduleLoop, Math.max(remainMs - 200, 100)); }
     else startLoop();
   }
 });
@@ -753,6 +756,7 @@ document.getElementById('muteBtn').addEventListener('click', function(){
 /* ================= 播放器拖拽 ================= */
 var playerEl = document.querySelector('.player');
 var dragState = null;
+function isMobile(){ return window.matchMedia('(max-width: 480px)').matches; }
 function clampPos(nx, ny){
   var maxX = window.innerWidth - 20, maxY = window.innerHeight - 20;
   nx = Math.max(8, Math.min(nx, maxX));
@@ -760,6 +764,7 @@ function clampPos(nx, ny){
   return {x: nx, y: ny};
 }
 playerEl.addEventListener('mousedown', function(e){
+  if (isMobile()) return; // 手机端底部通栏，无需拖拽
   if (e.target.closest('button')) return;
   var r = playerEl.getBoundingClientRect();
   playerEl.style.right = 'auto';
@@ -771,6 +776,7 @@ playerEl.addEventListener('mousedown', function(e){
   e.preventDefault();
 });
 playerEl.addEventListener('touchstart', function(e){
+  if (isMobile()) return; // 手机端底部通栏，无需拖拽
   if (e.target.closest('button')) return;
   var t = e.touches[0];
   var r = playerEl.getBoundingClientRect();
