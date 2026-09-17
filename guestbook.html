@@ -125,6 +125,53 @@
   }
   .board .plate::before{ left:8px; }
   .board .plate::after{ right:8px; transform:rotate(8deg); }
+  /* "仅站长可见"小标牌（毛毡板右上方） */
+  .board .owner-tag{
+    position:absolute; top:8px; right:10px;
+    background:var(--ink); color:var(--cream);
+    border:2px solid var(--ink); box-shadow:3px 3px 0 rgba(74,74,74,.45);
+    padding:2px 10px; font-size:10px; font-weight:900; letter-spacing:1px;
+    z-index:6; white-space:nowrap;
+  }
+  /* 锁屏遮罩：覆盖整块毛毡板 */
+  .board .lock-overlay{
+    position:absolute; inset:0;
+    background:rgba(74,74,74,.72);
+    backdrop-filter:blur(2px);
+    z-index:40;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .board .lock-overlay[hidden]{ display:none; }
+  .lock-box{
+    background:var(--cream); border:3px solid var(--ink);
+    box-shadow:6px 6px 0 rgba(0,0,0,.35);
+    padding:22px 26px; text-align:center; width:300px; max-width:82%;
+  }
+  .lock-box .lock-emoji{ font-size:38px; line-height:1; margin-bottom:8px; }
+  .lock-box .lock-title{
+    font-size:16px; font-weight:900; letter-spacing:4px;
+    background:var(--ink); color:var(--cream);
+    display:inline-block; padding:3px 14px; margin-bottom:8px;
+  }
+  .lock-box .lock-sub{ font-size:10px; color:#888; letter-spacing:2px; margin-bottom:14px; }
+  .lock-box input{
+    width:100%; font-family:inherit; font-size:13px;
+    border:2px solid var(--ink); background:#fff; padding:8px;
+    outline:none; text-align:center; letter-spacing:3px;
+  }
+  .lock-box input:focus{ box-shadow:0 0 0 3px var(--pink); }
+  .lock-box .lock-btn{
+    width:100%; margin-top:10px; font-family:inherit;
+    font-size:13px; font-weight:900; letter-spacing:2px;
+    background:var(--pink); color:var(--ink);
+    border:3px solid var(--ink); padding:8px 0; cursor:pointer;
+    box-shadow:4px 4px 0 var(--ink);
+  }
+  .lock-box .lock-btn:hover{ background:var(--pink-deep); }
+  .lock-box .lock-btn:active{ transform:translate(4px,4px); box-shadow:none; }
+  .lock-box .lock-err{ margin-top:10px; font-size:11px; color:#e5484d; font-weight:700; letter-spacing:1px; }
+  .board .plate::before{ left:8px; }
+  .board .plate::after{ right:8px; transform:rotate(8deg); }
   .board.empty::after{
     content:"ここはまだ空っぽ… 快贴上第一张便签吧 (´｡• ω •｡`)";
     position:absolute; inset:auto 20px 26px;
@@ -162,6 +209,11 @@
     margin-bottom:6px; word-break:break-all;
   }
   .note-card .who::before{ content:"♪ "; color:var(--pink-deep); }
+  .note-card .device{
+    font-size:9px; color:#777; margin-bottom:5px;
+    letter-spacing:1px; word-break:break-all;
+  }
+  .note-card .device::before{ content:"端末: "; color:#aaa; }
   .note-card .body{ white-space:pre-wrap; word-break:break-word; }
   .note-card .time{
     margin-top:8px; font-size:9px; color:#888; text-align:right;
@@ -293,6 +345,18 @@
 <div class="board-wrap">
   <div class="board" id="board">
     <span class="plate">✿ WU_TAPE 留言牆 ✿</span>
+    <span class="owner-tag" id="ownerTag">🔒 仅站长可见</span>
+    <!-- 锁屏遮罩（仅云模式启用）：站长输入密码后才能看便签 -->
+    <div class="lock-overlay" id="lockOverlay" hidden>
+      <div class="lock-box">
+        <div class="lock-emoji">🔒</div>
+        <div class="lock-title">仅站长可见</div>
+        <div class="lock-sub">PRIVATE · 输入密码解锁便签墙</div>
+        <input id="lockPw" type="password" maxlength="40" placeholder="站长密码…" autocomplete="off">
+        <button class="lock-btn" id="lockBtn">🔓 解锁</button>
+        <div class="lock-err" id="lockErr" hidden>⚠ 密码错误，再试一次</div>
+      </div>
+    </div>
     <!-- 便签由 JS 渲染到此处 -->
   </div>
 </div>
@@ -302,11 +366,15 @@
   <h2>新しい便签<span class="ja">留言</span></h2>
   <div class="row">
     <div>
-      <label>お名前 / 你的名字</label>
+      <label>お名前 / 名称</label>
       <input id="name" type="text" maxlength="20" placeholder="如：路过的候鸟">
     </div>
+    <div>
+      <label>端末 / 使用设备</label>
+      <input id="device" type="text" maxlength="40" placeholder="自动检测中…" readonly>
+    </div>
   </div>
-  <label>メッセージ / 留言内容</label>
+  <label>ご意見 / 意见</label>
   <textarea id="text" maxlength="200" placeholder="写点什么…(´｡• ω •｡`)\n例如：天台的麻雀今天也在发呆！"></textarea>
   <button class="postbtn" id="postBtn">📌 貼る!! 贴上便签</button>
   <div class="hint-note">※ 已配置 Supabase 云同步：便签全站共享；否则通过 server.py 运行时写入 guestbook-data.json；以上都没有则仅保存在本机浏览器</div>
@@ -392,15 +460,56 @@ function fmtTime(iso){
   }catch(e){ return ''; }
 }
 function cloudToNote(r){
-  return { id: r.id, name: r.name, text: r.content, color: r.color, rot: r.rot, time: fmtTime(r.created_at) };
+  return { id: r.id, name: r.name, text: r.content, device: r.device || '未知设备', color: r.color, rot: r.rot, time: fmtTime(r.created_at) };
+}
+/* ================= 锁屏（仅云模式启用） ================= */
+function lockBoard(){
+  var lock = document.getElementById('lockOverlay');
+  if (!lock) return;
+  lock.hidden = false;
+  document.getElementById('ownerTag').textContent = '🔒 仅站长可见';
+  var pw = document.getElementById('lockPw');
+  if (pw) pw.value = '';
+  render();   /* 只渲染空板 + 挂牌，不显示便签 */
+}
+function unlockBoard(){
+  var lock = document.getElementById('lockOverlay');
+  if (lock) lock.hidden = true;
+  document.getElementById('ownerTag').textContent = '🔓 站长已解锁';
+  render();
+  toast('🔓 已解锁毛毡板');
+}
+function doUnlock(){
+  var pwEl = document.getElementById('lockPw');
+  var errEl = document.getElementById('lockErr');
+  var pw = pwEl ? pwEl.value.trim() : '';
+  if (!pw){ return; }
+  fetch(SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/rpc/check_admin_password', {
+    method: 'POST',
+    headers: cloudHeaders(),
+    body: JSON.stringify({ admin_password: pw })
+  })
+  .then(function(r){ if(!r.ok) throw new Error('rpc'); return r.json(); })
+  .then(function(ok){
+    if (ok === true){
+      if (errEl) errEl.hidden = true;
+      unlockBoard();
+    } else {
+      if (errEl) errEl.hidden = false;
+    }
+  })
+  .catch(function(){
+    toast('⚠ 无法校验密码（网络或服务配置问题）');
+    if (errEl) errEl.hidden = false;
+  });
 }
 function loadFromCloud(){
-  fetch(apiBase() + '?select=id,name,content,color,rot,created_at&order=created_at.desc&limit=200',
+  fetch(apiBase() + '?select=id,name,content,device,color,rot,created_at&order=created_at.desc&limit=200',
         { headers: cloudHeaders(), cache: 'no-store' })
     .then(function(r){ if(!r.ok) throw new Error('supabase'); return r.json(); })
     .then(function(list){
       notes = (list || []).map(cloudToNote);
-      render();
+      lockBoard();   /* 仅站长可见：先锁板，输入密码后才渲染便签 */
     })
     .catch(function(){
       /* 云端失败：降级读取随站点部署的静态 guestbook-data.json，最后才用 localStorage */
@@ -420,6 +529,24 @@ function loadFromCloud(){
           toast('⚠ 云端留言同步失败，已切换为本机模式');
         });
     });
+}
+
+/* ================= 设备检测 ================= */
+function detectDevice(){
+  var ua = navigator.userAgent;
+  var os = 'PC', type = '💻';
+  if (/iPhone|iPad|iPod/.test(ua)){ os = 'iOS'; type = '📱'; }
+  else if (/Android/.test(ua)){ os = 'Android'; type = '📱'; }
+  else if (/Windows/.test(ua)){ os = 'Windows'; }
+  else if (/Mac OS X|Macintosh/.test(ua)){ os = 'macOS'; }
+  else if (/Linux/.test(ua)){ os = 'Linux'; }
+  var browser = '浏览器';
+  if (/Edg\//.test(ua)) browser = 'Edge';
+  else if (/OPR\/|Opera/.test(ua)) browser = 'Opera';
+  else if (/Chrome\//.test(ua)) browser = 'Chrome';
+  else if (/Firefox\//.test(ua)) browser = 'Firefox';
+  else if (/Safari\//.test(ua)) browser = 'Safari';
+  return type + ' ' + os + ' · ' + browser;
 }
 
 /* ================= 渲染毛毡板（网格铺开，互不重叠） ================= */
@@ -458,16 +585,21 @@ function layoutNotes(list){
 }
 function render(){
   var board = document.getElementById('board');
-  board.classList.toggle('empty', notes.length === 0);
+  var lock = document.getElementById('lockOverlay');
+  var locked = lock && !lock.hidden;
+  board.classList.toggle('empty', notes.length === 0 && !locked);
   /* 保留挂牌，清除便签 */
   var plate = board.querySelector('.plate');
   board.querySelectorAll('.note-card').forEach(function(n){ n.remove(); });
   if (plate) board.appendChild(plate);
-  var pos = layoutNotes(notes);
-  notes.forEach(function(n, i){
-    board.insertBefore(makeNote(n, i, i === 0, pos[i]), plate);
-  });
-  document.getElementById('count').textContent = notes.length;
+  if (!locked){
+    /* 已解锁（或非云模式）：渲染便签 */
+    var pos = layoutNotes(notes);
+    notes.forEach(function(n, i){
+      board.insertBefore(makeNote(n, i, i === 0, pos[i]), plate);
+    });
+  }
+  document.getElementById('count').textContent = locked ? '🔒' : notes.length;
 }
 
 function makeNote(n, i, isNew, p){
@@ -483,6 +615,7 @@ function makeNote(n, i, isNew, p){
     '<span class="pin"></span>' +
     '<button class="del" data-id="' + esc(String(n.id)) + '" title="删除便签">×</button>' +
     '<div class="who">' + esc(n.name) + '</div>' +
+    '<div class="device">' + esc(n.device || '未知设备') + '</div>' +
     '<div class="body">' + esc(n.text) + '</div>' +
     '<div class="time">' + esc(n.time) + '</div>';
   if (isNew) card.classList.add('stick');
@@ -561,6 +694,7 @@ function post(){
     id: 'l' + Date.now() + Math.random().toString(36).slice(2, 6),
     name: name,
     text: text,
+    device: detectDevice(),
     time: (now.getMonth()+1) + '/' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()),
     color: COLORS[Math.floor(Math.random()*COLORS.length)],
     rot: (Math.random()*6 - 3).toFixed(1)
@@ -571,7 +705,7 @@ function post(){
     fetch(apiBase(), {
       method: 'POST',
       headers: Object.assign(cloudHeaders(), {Prefer: 'return=representation'}),
-      body: JSON.stringify({ name: name, content: text, color: note.color, rot: note.rot })
+      body: JSON.stringify({ name: name, content: text, device: note.device, color: note.color, rot: note.rot })
     })
     .then(function(r){ if(!r.ok) throw new Error('api'); return r.json(); })
     .then(function(list){
@@ -588,7 +722,7 @@ function post(){
     fetch('/api/notes', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({name: name, text: text})
+      body: JSON.stringify({name: name, text: text, device: note.device})
     })
     .then(function(r){ if(!r.ok) throw new Error('api'); return r.json(); })
     .then(function(d){
@@ -626,6 +760,16 @@ function toast(msg){
   clearTimeout(t._timer);
   t._timer = setTimeout(function(){ t.style.display = 'none'; }, 2600);
 }
+
+/* ================= 初始化 ================= */
+(function init(){
+  var deviceEl = document.getElementById('device');
+  if (deviceEl) deviceEl.value = detectDevice();
+  document.getElementById('lockBtn').addEventListener('click', doUnlock);
+  document.getElementById('lockPw').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') doUnlock();
+  });
+})();
 
 document.getElementById('postBtn').addEventListener('click', post);
 document.getElementById('text').addEventListener('keydown', function(e){

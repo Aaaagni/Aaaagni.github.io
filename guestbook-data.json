@@ -5,7 +5,8 @@
     "text": "o.o",
     "time": "9/16 23:36",
     "color": "c-pink",
-    "rot": "0.7"
+    "rot": "0.7",
+    "device": "💻 Windows · Chrome"
   },
   {
     "id": "20260917090134",
@@ -13,7 +14,8 @@
     "text": "这对我很重要",
     "time": "9/17 17:01",
     "color": "c-white",
-    "rot": "-0.9"
+    "rot": "-0.9",
+    "device": "📱 Android · Chrome"
   },
   {
     "id": "20260917084150",
@@ -21,7 +23,8 @@
     "text": "online felt board is LIVE",
     "time": "9/17 16:41",
     "color": "c-mint",
-    "rot": "-1.5"
+    "rot": "-1.5",
+    "device": "💻 macOS · Safari"
   },
   {
     "id": "20260916233347595233",
@@ -29,7 +32,8 @@
     "text": "-.-",
     "time": "9/16 23:33",
     "color": "c-pink",
-    "rot": "2.6"
+    "rot": "2.6",
+    "device": "📱 iOS · Safari"
   },
   {
     "id": "seed-1",
@@ -37,6 +41,7 @@
     "text": "欢迎光临毛毡板！贴张便签再走吧 (´｡• ω •｡`)\n这条是站长钉下的第一张。",
     "time": "站长の第一張",
     "color": "c-mint",
-    "rot": "-2"
+    "rot": "-2",
+    "device": "💻 Windows · Edge"
   }
 ]

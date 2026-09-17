@@ -30,7 +30,8 @@ SEED = [{
     "text": "欢迎光临毛毡板！贴张便签再走吧 (´｡• ω •｡`)\n这条是站长钉下的第一张。",
     "time": "站长の第一張",
     "color": "c-mint",
-    "rot": "-2"
+    "rot": "-2",
+    "device": "💻 Windows · Edge"
 }]
 
 _lock = threading.Lock()
@@ -93,6 +94,7 @@ class Handler(SimpleHTTPRequestHandler):
             data = {}
         name = str(data.get("name", "")).strip()[:20]
         text = str(data.get("text", "")).strip()[:200]
+        device = str(data.get("device", "")).strip()[:40] or "未知设备"
         if not name or not text:
             self._json({"ok": False, "error": "name and text required"}, 400)
             return
@@ -102,6 +104,7 @@ class Handler(SimpleHTTPRequestHandler):
             "id": now.strftime("%Y%m%d%H%M%S%f"),
             "name": name,
             "text": text,
+            "device": device,
             "time": "%d/%d %02d:%02d" % (now.month, now.day, now.hour, now.minute),
             "color": COLORS[now.microsecond % 4],
             "rot": "%.1f" % ((now.microsecond % 61) / 10 - 3),
