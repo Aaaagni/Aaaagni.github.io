@@ -714,7 +714,7 @@ function post(){
       render();
       nameEl.value = ''; textEl.value = '';
       pluck();
-      toast('便签已钉上云端毛毡板 ✦ 所有访客可见');
+      toast('✓ 已收到您的意见（站长解锁后可见）');
     })
     .catch(function(){ mode = 'local'; fallbackLocal(nameEl, textEl, note); toast('⚠ 云端写入失败，便签仅保存在本机浏览器'); });
   } else if (mode === 'server'){
@@ -730,7 +730,7 @@ function post(){
       render();
       nameEl.value = ''; textEl.value = '';
       pluck();
-      toast('便签已钉上毛毡板 ✦ 已写入 guestbook-data.json');
+      toast('✓ 已收到您的意见（站长解锁后可见）');
     })
     .catch(function(){ fallbackLocal(nameEl, textEl, note); });
   } else {
