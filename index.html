@@ -23,7 +23,6 @@
     color:var(--ink);
     line-height:1.6;
     padding-bottom:60px;
-    image-rendering:pixelated;
   }
   .pixelated{ image-rendering:pixelated; }
 
@@ -247,6 +246,78 @@
   .bird-card .name{ font-weight:700; font-size:11px; }
   .bird-card .latin{ font-size:9px; color:#888; }
 
+  /* ---------- 图鉴：三个小板块 ---------- */
+  .gallery-tabs{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    margin-bottom:14px;
+  }
+  .gallery-tab{
+    font-family:inherit; font-size:12px; font-weight:900; letter-spacing:1px;
+    color:var(--ink); background:var(--cream);
+    border:2px solid var(--ink); box-shadow:3px 3px 0 var(--ink);
+    padding:6px 14px; cursor:pointer;
+    transition:transform .05s;
+  }
+  .gallery-tab:hover{ background:var(--pink); }
+  .gallery-tab:active{ transform:translate(3px,3px); box-shadow:none; }
+  .gallery-tab.active{ background:var(--ink); color:var(--cream); box-shadow:3px 3px 0 var(--pink-deep); }
+  .gallery-tab .count{ font-size:10px; opacity:.75; margin-left:3px; }
+  .gallery-panel{ display:none; }
+  .gallery-panel.active{ display:block; }
+  .photo-wrap{
+    display:flex; flex-wrap:wrap; gap:14px; justify-content:center;
+  }
+  .photo-card{
+    border:2px solid var(--ink); background:#fff;
+    padding:8px; width:150px; text-align:center;
+    box-shadow:4px 4px 0 var(--mint);
+  }
+  .photo-frame{
+    border:2px solid var(--ink); padding:4px;
+    background:repeating-linear-gradient(45deg,var(--pink) 0 6px,var(--cream) 6px 12px);
+    margin-bottom:6px;
+  }
+  .photo-frame img{
+    display:block; width:100%; aspect-ratio:1/1; object-fit:cover;
+    border:2px solid var(--ink);
+    image-rendering:pixelated;
+  }
+  .photo-card .name{ font-weight:900; font-size:11px; letter-spacing:.5px; }
+  .photo-card .latin{ font-size:9px; color:#888; margin-top:2px; }
+  .photo-card .note{ font-size:9px; color:#666; margin-top:2px; }
+  .empty-note{
+    border:2px dashed var(--pink-deep); background:#fff;
+    padding:18px 12px; text-align:center; font-size:12px; color:#888;
+  }
+  .empty-note b{ color:var(--pink-deep); }
+
+  /* ---------- 主页：图鉴入口主图 ---------- */
+  .gallery-hero{
+    display:block; position:relative; overflow:hidden;
+    border:3px solid var(--ink); box-shadow:5px 5px 0 var(--pink);
+    text-decoration:none; color:var(--ink);
+  }
+  .gallery-hero-img{ overflow:hidden; }
+  .gallery-hero-img img{
+    display:block; width:100%; height:300px; object-fit:cover;
+    transition:transform .25s;
+  }
+  .gallery-hero:hover .gallery-hero-img img{ transform:scale(1.04); }
+  .gallery-hero-overlay{
+    position:absolute; left:0; right:0; bottom:0;
+    background:rgba(255,250,245,.93);
+    border-top:3px solid var(--ink);
+    padding:10px 14px;
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+  }
+  .gallery-hero-title{
+    font-weight:900; font-size:16px; letter-spacing:2px;
+    background:var(--ink); color:var(--cream);
+    padding:3px 10px; white-space:nowrap;
+  }
+  .gallery-hero-sub{ font-size:11px; font-weight:700; color:var(--pink-deep); }
+  .gallery-hero:hover .gallery-hero-overlay{ background:var(--pink); }
+
   /* ---------- 聊天区 ---------- */
   .chatbox{
     border:3px solid var(--ink);
@@ -354,12 +425,47 @@
     .player{ right:8px; top:58px; width:200px; }
     .avatar-wrap{ width:140px; }
   }
-  @media (max-width:480px){
+  @media (max-width:600px){
+    /* 手机端：播放器贴底，给页面留出空间不被遮挡 */
+    body{ padding-bottom:120px; }
+    /* 手机端：导航更紧凑 */
+    nav{ gap:3px; padding:6px 8px; }
     nav .hint{ display:none; }
-    .player{ width:180px; font-size:10px; }
-    .player{ position:fixed; right:6px; top:auto; bottom:8px; left:6px; width:auto; }
-    nav .logo{ font-size:12px; }
-    nav .link{ padding:3px 8px; font-size:12px; }
+    nav .logo{ font-size:11px; padding:3px 8px; }
+    nav .link{ padding:3px 7px; font-size:11px; }
+    /* 手机端：播放器贴底横条，不挡右上角 */
+    .player{
+      position:fixed; right:6px; top:auto; bottom:8px; left:6px;
+      width:auto; font-size:10px; padding:8px;
+      z-index:60;
+    }
+    /* 手机端：页面容器与卡片收紧 */
+    .container{ padding:12px 8px; gap:12px; }
+    .card{ padding:12px; }
+    .char-name{ font-size:18px; }
+    .avatar-wrap{ width:132px; }
+    /* 手机端：图鉴入口主图降低高度 */
+    .gallery-hero-img img{ height:180px; }
+    /* 手机端：像素鸟装饰卡缩小 */
+    .bird-wrap{ gap:10px; }
+    .bird-card{ width:92px; padding:8px; }
+    .bird-card .bx{ width:52px; }
+    /* 手机端：文字信息密度调整 */
+    .profile-row{ font-size:12px; }
+    .fortune-row{ font-size:11px; }
+    .timeline-item{ font-size:12px; gap:8px; }
+    .welcome-text{ font-size:12.5px; }
+    .contact-card{ padding:10px; }
+    footer .linkbtn{ padding:8px 14px; font-size:13px; }
+    /* 手机端：聊天区 */
+    .chatbox .msgs{ height:300px; }
+    .msg{ max-width:92%; font-size:12px; }
+    .chatbox .quick button{ font-size:10px; padding:3px 6px; }
+  }
+  @media (max-width:480px){
+    nav .logo{ font-size:10px; padding:2px 6px; }
+    nav .link{ padding:2px 6px; font-size:10px; }
+    .player{ bottom:6px; left:4px; right:4px; }
   }
 </style>
 </head>
@@ -373,7 +479,7 @@
   <span class="logo">WU_JIAXU.com</span>
   <a class="link" href="#home">HOME</a>
   <a class="link" href="#now">NOW</a>
-  <a class="link" href="#gallery">GALLERY</a>
+  <a class="link" href="gallery.html">GALLERY</a>
   <a class="link" href="guestbook.html">GUESTBOOK</a>
   <span class="hint">(´｡• ω •｡`) welcome!</span>
 </nav>
@@ -522,28 +628,20 @@
       <div class="timeline-item myst"><span class="day myst">???</span><span class="arrow">→</span><span class="desc">故事继续中…</span></div>
     </section>
 
-    <!-- GALLERY -->
+    <!-- GALLERY 入口 -->
     <section class="card" id="gallery">
       <h2>GALLERY<span class="ja">図鑑</span></h2>
-      <div class="bird-wrap">
-        <div class="bird-card">
-          <div class="bx" id="bird1"></div>
-          <div class="name">红隼? 不, 是麻雀</div>
-          <div class="latin">Passer montanus // 天台常见</div>
+      <a class="gallery-hero" href="gallery.html" title="进入图鉴">
+        <div class="gallery-hero-img">
+          <img src="gallery/06-white-grey-birds.jpg" alt="图鉴主图：树枝上的长冠八哥与爪哇禾雀">
         </div>
-        <div class="bird-card">
-          <div class="bx" id="bird2"></div>
-          <div class="name">翡翠鳥</div>
-          <div class="latin">Alcedo atthis // 只在漫画里见过</div>
+        <div class="gallery-hero-overlay">
+          <span class="gallery-hero-title">进入図鑑 →</span>
+          <span class="gallery-hero-sub">羽族 ・ 苦艾草 ・ 申必</span>
         </div>
-        <div class="bird-card">
-          <div class="bx" id="bird3"></div>
-          <div class="name">未来的鸟</div>
-          <div class="latin">BirdCloud 概念鸟 // 待实现</div>
-        </div>
-      </div>
+      </a>
       <p style="text-align:center;font-size:11px;margin-top:10px;color:#888;">
-        今天也在努力辨认窗外的每一只鸟 ✦
+        点击主图，翻开我的收集小屋 ✦
       </p>
     </section>
 
@@ -647,11 +745,8 @@ function birdMatrix(body, eye, beak, leg){
   ];
 }
 var B1 = birdMatrix('B','W','O','T');
-drawPixels(document.getElementById('bird1'), B1.join('\n'), {B:'#f7b731', W:'#ffffff', O:'#ff8fab', T:'#b3822e'}, 12);
 var B2 = birdMatrix('B','W','O','T');
-drawPixels(document.getElementById('bird2'), B2.join('\n'), {B:'#7ec8e3', W:'#ffffff', O:'#ff9ecb', T:'#b3822e'}, 12);
 var B3 = birdMatrix('B','W','O','T');
-drawPixels(document.getElementById('bird3'), B3.join('\n'), {B:'#b7e8d8', W:'#ffffff', O:'#ffb6c1', T:'#b3822e'}, 12);
 
 /* ================= 音乐播放器（Web Audio 合成） ================= */
 var NOTE = {

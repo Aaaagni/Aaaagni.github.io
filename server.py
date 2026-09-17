@@ -19,7 +19,7 @@ from urllib.parse import urlparse
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(ROOT, "guestbook-data.json")
 PORT = int(os.environ.get("PORT", "8623"))
-HOST = os.environ.get("HOST", "127.0.0.1")
+HOST = os.environ.get("HOST", "0.0.0.0")   # 0.0.0.0 = 电脑 + 局域网手机都能访问
 
 COLORS = ["c-yellow", "c-pink", "c-mint", "c-white"]
 
@@ -69,9 +69,13 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
+
+    def end_headers(self):
+        """所有响应（API + 静态页面/图片）都禁止缓存，开发期保证改动即时可见"""
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
 
     # ---------- GET ----------
     def do_GET(self):
@@ -144,5 +148,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     print("WU_JIAXU.com 本地服务器已启动: http://%s:%d  (留言板数据: %s)"
-          % (HOST, PORT, DATA_FILE))
+          % ("127.0.0.1" if HOST == "0.0.0.0" else HOST, PORT, DATA_FILE))
+    if HOST == "0.0.0.0":
+        print("局域网访问（手机同一 Wi-Fi）: http://<本机局域网IP>:%d" % PORT)
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
