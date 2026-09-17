@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WU JIAXU // 武家旭の個人サイト</title>
+<style>
+  :root{
+    --pink:#ffb6c1; --pink-deep:#ff8fab; --pink-dark:#f78fb3;
+    --mint:#b7e8d8; --mint-deep:#a8e6cf;
+    --cream:#fffaf5; --ink:#4a4a4a; --skin:#ffe9d6;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    font-family:"Courier New", "MS Gothic", "Microsoft YaHei", monospace;
+    background-color:var(--cream);
+    background-image:
+      radial-gradient(var(--pink) 1px, transparent 1px),
+      radial-gradient(var(--mint) 1px, transparent 1px);
+    background-size:22px 22px, 22px 22px;
+    background-position:0 0, 11px 11px;
+    color:var(--ink);
+    line-height:1.6;
+    padding-bottom:60px;
+    image-rendering:pixelated;
+  }
+  .pixelated{ image-rendering:pixelated; }
+
+  /* ---------- 顶部条纹 ---------- */
+  .stripes{
+    height:16px;
+    border-bottom:3px solid var(--ink);
+    background:repeating-linear-gradient(90deg,
+      var(--pink) 0 18px, var(--mint) 18px 36px,
+      var(--cream) 36px 42px, var(--pink) 42px 60px);
+    animation:stripeMove 12s linear infinite;
+  }
+  @keyframes stripeMove{ from{background-position:0 0;} to{background-position:60px 0;} }
+
+  /* ---------- 导航 ---------- */
+  nav{
+    background:var(--cream);
+    border-bottom:3px solid var(--ink);
+    display:flex; align-items:center; gap:4px;
+    padding:8px 14px;
+    position:sticky; top:0; z-index:50;
+    box-shadow:0 4px 0 rgba(74,74,74,.15);
+  }
+  nav .logo{
+    font-weight:900; letter-spacing:1px;
+    background:var(--ink); color:var(--cream);
+    padding:4px 10px; border:2px solid var(--ink);
+    box-shadow:3px 3px 0 var(--pink);
+    white-space:nowrap;
+  }
+  nav .link{
+    text-decoration:none; color:var(--ink);
+    border:2px solid var(--ink); background:var(--mint);
+    padding:4px 12px; font-weight:700;
+    box-shadow:3px 3px 0 var(--ink);
+    transition:transform .05s;
+  }
+  nav .link:active{ transform:translate(3px,3px); box-shadow:none; }
+  nav .link:hover{ background:#d6f3e8; }
+  nav .hint{ margin-left:auto; font-size:11px; }
+
+  /* ---------- 播放器挂件 ---------- */
+  .player{
+    position:fixed; right:14px; top:64px; z-index:60;
+    width:230px; background:var(--cream);
+    border:3px solid var(--ink); box-shadow:5px 5px 0 var(--pink);
+    padding:10px; font-size:11px;
+    cursor:grab; user-select:none; -webkit-user-select:none; touch-action:none;
+  }
+  .player.dragging{ cursor:grabbing; box-shadow:5px 5px 0 var(--pink-deep); }
+  .player .label{ cursor:move; }
+  .player .label{
+    background:var(--ink); color:var(--cream);
+    text-align:center; padding:2px 0; letter-spacing:2px;
+    font-weight:700; margin-bottom:8px;
+  }
+  .tape{
+    display:flex; align-items:center; gap:8px;
+    border:2px solid var(--ink); background:var(--pink);
+    padding:6px;
+  }
+  .reel{
+    width:26px; height:26px; border-radius:50%;
+    border:3px solid var(--ink); background:var(--cream);
+    position:relative; flex-shrink:0;
+  }
+  .reel::after{
+    content:""; position:absolute; inset:6px;
+    border-radius:50%; background:var(--ink);
+  }
+  .reel.spin{ animation:spin 2.2s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  .tape .track{ flex:1; }
+  .tape .song{ font-weight:700; font-size:11px; }
+  .tape .artist{ font-size:10px; color:#666; }
+  .player .bar{
+    height:10px; border:2px solid var(--ink); background:#fff;
+    margin-top:8px; position:relative;
+  }
+  .player .bar i{
+    position:absolute; left:0; top:0; bottom:0; width:0%;
+    background:repeating-linear-gradient(90deg,var(--pink) 0 4px,var(--mint) 4px 8px);
+  }
+  .player .ctrl{
+    display:flex; gap:6px; margin-top:8px;
+  }
+  .player .ctrl button{
+    flex:1; font-family:inherit; font-weight:700; font-size:11px;
+    background:var(--mint); color:var(--ink);
+    border:2px solid var(--ink); box-shadow:2px 2px 0 var(--ink);
+    padding:4px 0; cursor:pointer;
+  }
+  .player .ctrl button:active{ transform:translate(2px,2px); box-shadow:none; }
+
+  /* ---------- 布局 ---------- */
+  .container{
+    max-width:1000px; margin:0 auto; padding:18px 12px;
+    display:grid; grid-template-columns:300px 1fr; gap:18px;
+    align-items:start;
+  }
+  .card{
+    background:var(--cream);
+    border:3px solid var(--ink);
+    box-shadow:5px 5px 0 rgba(74,74,74,.9);
+    padding:14px; margin-bottom:18px;
+    position:relative;
+  }
+  .card::before{
+    content:"✦"; position:absolute; top:-12px; right:10px;
+    background:var(--cream); padding:0 6px;
+    border:2px solid var(--ink); color:var(--pink-deep);
+  }
+  .card h2{
+    font-size:15px; letter-spacing:2px; margin-bottom:10px;
+    display:inline-block;
+    background:var(--ink); color:var(--cream);
+    padding:3px 10px; transform:rotate(-1deg);
+  }
+  .card h2 .ja{ color:var(--pink); }
+  .section-title{
+    font-weight:900; letter-spacing:2px; text-align:center;
+    margin:26px 0 10px; font-size:18px;
+    text-shadow:2px 2px 0 rgba(255,182,193,.8);
+  }
+  .divider{
+    height:6px; margin:14px 0;
+    background:repeating-linear-gradient(90deg,
+      var(--ink) 0 8px, transparent 8px 16px);
+  }
+
+  /* ---------- 像素画 ---------- */
+  .pxbox{
+    display:grid; gap:0; width:100%; aspect-ratio:1/1;
+    border:3px solid var(--ink);
+    background:#fff;
+    box-shadow:inset 0 0 0 3px var(--cream), 4px 4px 0 rgba(74,74,74,.9);
+    image-rendering:pixelated;
+  }
+  .pxbox .px{ width:100%; aspect-ratio:1/1; }
+  .avatar-wrap{
+    width:168px; margin:0 auto 10px;
+  }
+  .pixel-avatar{
+    display:block; width:100%; aspect-ratio:1/1; object-fit:cover;
+    border:2px solid var(--ink);
+    image-rendering:pixelated;
+  }
+  .pxframe{
+    border:2px solid var(--ink); padding:6px;
+    background:repeating-linear-gradient(45deg,var(--pink) 0 6px,var(--cream) 6px 12px);
+  }
+
+  /* ---------- 侧栏细节 ---------- */
+  .char-name{
+    text-align:center; font-size:22px; font-weight:900; letter-spacing:3px;
+  }
+  .char-name .jp{ display:block; font-size:12px; color:#777; letter-spacing:6px; }
+  .char-tag{
+    text-align:center; font-size:12px; margin-top:4px;
+  }
+  .palette{ display:flex; justify-content:center; gap:8px; margin-top:10px; }
+  .swatch{
+    width:30px; height:30px; border:2px solid var(--ink);
+    box-shadow:2px 2px 0 rgba(74,74,74,.6);
+  }
+  .profile-row{
+    display:flex; justify-content:space-between;
+    border-bottom:1px dashed var(--pink); padding:5px 2px;
+  }
+  .profile-row b{ background:var(--mint); padding:0 6px; }
+  .profile-row span{ font-weight:700; }
+  .tag-row{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .tag{
+    border:2px solid var(--ink); background:#fff;
+    padding:2px 8px; font-size:11px; font-weight:700;
+    box-shadow:2px 2px 0 var(--ink);
+  }
+  .tag.pink{ background:var(--pink); }
+  .tag.mint{ background:var(--mint); }
+  .stars{ letter-spacing:3px; color:var(--pink-deep); font-size:16px; }
+  .fortune-row{
+    display:flex; justify-content:space-between;
+    border-bottom:1px dashed var(--mint); padding:4px 2px; font-size:12px;
+  }
+  .fortune-row b{ background:var(--pink); padding:0 6px; }
+  .fortune-row .lucky{ color:#b3822e; font-weight:700; }
+
+  /* ---------- 中部区块 ---------- */
+  .quote{
+    margin-top:12px; border-left:6px solid var(--mint-deep);
+    background:#fff; padding:10px 14px; font-size:13px;
+    box-shadow:3px 3px 0 rgba(74,74,74,.15);
+  }
+  .quote .who{ text-align:right; font-size:11px; color:#777; }
+  .welcome-text{ font-size:13px; }
+  .welcome-text .hl{ background:var(--pink); padding:0 4px; font-weight:700; }
+  .welcome-text .hl2{ background:var(--mint); padding:0 4px; font-weight:700; }
+
+  .timeline-item{
+    display:flex; gap:10px; align-items:baseline;
+    padding:7px 4px; border-bottom:2px dotted var(--pink);
+    font-size:13px;
+  }
+  .timeline-item .day{
+    flex-shrink:0; font-weight:900; letter-spacing:1px;
+    background:var(--ink); color:var(--cream); padding:1px 8px;
+    font-size:11px;
+  }
+  .timeline-item .day.myst{ background:var(--pink-deep); }
+  .timeline-item .arrow{ color:var(--pink-deep); }
+  .timeline-item.myst .desc{ color:var(--pink-deep); font-weight:700; }
+
+  .bird-wrap{ display:flex; flex-wrap:wrap; gap:16px; justify-content:center; }
+  .bird-card{
+    border:2px solid var(--ink); background:#fff;
+    padding:10px; width:110px; text-align:center;
+    box-shadow:4px 4px 0 var(--mint);
+  }
+  .bird-card .bx{ display:grid; width:64px; margin:0 auto 6px; }
+  .bird-card .bx .px{ width:100%; aspect-ratio:1/1; }
+  .bird-card .name{ font-weight:700; font-size:11px; }
+  .bird-card .latin{ font-size:9px; color:#888; }
+
+  /* ---------- 聊天区 ---------- */
+  .chatbox{
+    border:3px solid var(--ink);
+    box-shadow:5px 5px 0 var(--pink);
+    background:var(--cream);
+    margin-bottom:18px;
+  }
+  .chatbox .head{
+    background:var(--ink); color:var(--cream);
+    padding:8px 12px; display:flex; align-items:center; gap:8px;
+    letter-spacing:1px; font-weight:700;
+  }
+  .chatbox .head .dot{
+    width:10px; height:10px; border-radius:50%;
+    background:var(--mint); box-shadow:0 0 0 2px var(--cream);
+    animation:blink 1.6s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{ background:var(--pink);} }
+  .chatbox .head .online{ font-size:10px; color:var(--mint); margin-left:auto; }
+  .chatbox .msgs{
+    height:340px; overflow-y:auto; padding:12px;
+    background:
+      linear-gradient(transparent 11px, rgba(255,182,193,.25) 11px, rgba(255,182,193,.25) 12px),
+      #fff;
+    background-size:100% 12px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .msg{
+    max-width:80%; padding:7px 10px; font-size:12.5px;
+    border:2px solid var(--ink); white-space:pre-wrap; word-break:break-word;
+  }
+  .msg.bot{
+    align-self:flex-start; background:#fff;
+    border-bottom-left-radius:0;
+    box-shadow:3px 3px 0 rgba(74,74,74,.35);
+  }
+  .msg.bot::before{ content:"JX▸ "; color:var(--pink-deep); font-weight:900; }
+  .msg.user{
+    align-self:flex-end; background:var(--mint);
+    box-shadow:-3px 3px 0 rgba(74,74,74,.35);
+  }
+  .msg.typing{ color:#999; font-style:italic; }
+  .chatbox .quick{
+    display:flex; flex-wrap:wrap; gap:6px; padding:10px 12px 0;
+  }
+  .chatbox .quick button{
+    font-family:inherit; font-size:11px; font-weight:700;
+    border:2px solid var(--ink); background:#fff;
+    padding:4px 8px; cursor:pointer; box-shadow:2px 2px 0 var(--ink);
+  }
+  .chatbox .quick button:hover{ background:var(--pink); }
+  .chatbox .inputbar{
+    display:flex; gap:8px; padding:10px 12px;
+  }
+  .chatbox .inputbar input{
+    flex:1; font-family:inherit; font-size:13px;
+    border:2px solid var(--ink); padding:8px; outline:none; background:#fff;
+  }
+  .chatbox .inputbar input:focus{ box-shadow:0 0 0 3px var(--pink); }
+  .chatbox .inputbar button{
+    font-family:inherit; font-weight:900; letter-spacing:1px;
+    background:var(--pink); color:var(--ink);
+    border:2px solid var(--ink); padding:8px 16px; cursor:pointer;
+    box-shadow:3px 3px 0 var(--ink);
+  }
+  .chatbox .inputbar button:active{ transform:translate(3px,3px); box-shadow:none; }
+
+  /* ---------- 联系栏 ---------- */
+  .contact-card{
+    max-width:1000px; margin:0 auto; padding:14px;
+  }
+  .contact-card a{
+    color:var(--ink); font-weight:700; text-decoration:none;
+    border-bottom:2px dashed var(--pink);
+  }
+  .contact-card a:hover{ color:var(--pink-deep); border-bottom-style:solid; }
+  .contact-note{
+    text-align:center; font-size:11px; color:#888; margin-top:8px;
+  }
+
+  /* ---------- 页脚 ---------- */
+  footer{
+    text-align:center; font-size:12px; margin-top:10px;
+  }
+  footer .linkbtn{
+    display:inline-block; margin:8px;
+    font-family:inherit; font-weight:900; font-size:14px;
+    text-decoration:none; color:var(--ink);
+    background:var(--mint); border:3px solid var(--ink);
+    box-shadow:4px 4px 0 var(--pink);
+    padding:10px 20px;
+  }
+  footer .linkbtn:active{ transform:translate(4px,4px); box-shadow:none; }
+  .marquee{
+    overflow:hidden; white-space:nowrap;
+    border-top:2px solid var(--ink); border-bottom:2px solid var(--ink);
+    background:#fff; padding:4px 0; margin-top:20px; font-size:11px;
+  }
+  .marquee span{ display:inline-block; padding-left:100%; animation:mq 18s linear infinite; }
+  @keyframes mq{ to{ transform:translateX(-100%);} }
+
+  /* ---------- 响应式 ---------- */
+  @media (max-width:820px){
+    .container{ grid-template-columns:1fr; }
+    .player{ right:8px; top:58px; width:200px; }
+    .avatar-wrap{ width:140px; }
+  }
+  @media (max-width:480px){
+    nav .hint{ display:none; }
+    .player{ width:180px; font-size:10px; }
+    .player{ position:fixed; right:6px; top:auto; bottom:8px; left:6px; width:auto; }
+    nav .logo{ font-size:12px; }
+    nav .link{ padding:3px 8px; font-size:12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 顶部粉绿条纹 -->
+<div class="stripes"></div>
+
+<!-- 导航 -->
+<nav>
+  <span class="logo">WU_JIAXU.com</span>
+  <a class="link" href="#home">HOME</a>
+  <a class="link" href="#now">NOW</a>
+  <a class="link" href="#gallery">GALLERY</a>
+  <a class="link" href="guestbook.html">GUESTBOOK</a>
+  <span class="hint">(´｡• ω •｡`) welcome!</span>
+</nav>
+
+<!-- 播放器挂件 -->
+<div class="player">
+  <div class="label">♪ WU-TAPE ♪</div>
+  <div class="tape">
+    <div class="reel" id="reelL"></div>
+    <div class="track">
+      <div class="song">The Gypsy Bard</div>
+      <div class="artist">Fluttershy x 星空</div>
+    </div>
+    <div class="reel" id="reelR"></div>
+  </div>
+  <div class="bar"><i id="barFill"></i></div>
+  <div class="ctrl">
+    <button id="playBtn" title="播放/暂停">▶ PLAY</button>
+    <button id="muteBtn" title="静音">MUTE</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ============ 左栏 ============ -->
+  <aside>
+    <!-- CHARACTER -->
+    <section class="card">
+      <h2>CHARACTER<span class="ja">キャラ</span></h2>
+      <div class="pxframe">
+        <img class="pixel-avatar" src="avatar.jpg" alt="武家旭头像">
+      </div>
+      <div class="char-name">WU JIAXU<span class="jp">武 家 旭</span></div>
+      <div class="char-tag">天津大学（港理工深圳）未来技术学院 ・ 大一生</div>
+      <div class="palette">
+        <div class="swatch" style="background:#ffb6c1" title="樱花粉"></div>
+        <div class="swatch" style="background:#b7e8d8" title="薄巧薄荷"></div>
+        <div class="swatch" style="background:#fffaf5" title="奶白"></div>
+        <div class="swatch" style="background:#4a4a4a" title="墨黑"></div>
+      </div>
+      <div style="text-align:center;font-size:10px;margin-top:6px;color:#888;">
+        color palette // 薄巧 × 淡粉
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="card">
+      <h2>PROFILE<span class="ja">プロフィール</span></h2>
+      <div class="profile-row"><b>NAME</b><span>WU JIAXU / 武家旭</span></div>
+      <div class="profile-row"><b>GRADE</b><span>1年生 (大一)</span></div>
+      <div class="profile-row"><b>MAJOR</b><span>计算机科学与技术</span></div>
+      <div class="profile-row"><b>SCHOOL</b><span>天大深・未来技术学院</span></div>
+      <div class="profile-row"><b>LOC</b><span>天津 ⇄ 深圳</span></div>
+      <div class="profile-row"><b>NOW</b><span>设计 BirdCloud 中…</span></div>
+    </section>
+
+    <!-- PERSONALITY -->
+    <section class="card">
+      <h2>INTEREST<span class="ja">趣味</span></h2>
+      <div class="profile-row"><b>BIRD</b><span>观鸟（校园天台常驻）</span></div>
+      <div class="profile-row"><b>MANGA</b><span>漫画（熬夜选手）</span></div>
+      <div class="profile-row"><b>CODE</b><span>个人项目开发</span></div>
+      <div class="tag-row">
+        <span class="tag pink">观鸟</span>
+        <span class="tag mint">漫画</span>
+        <span class="tag">薄巧</span>
+        <span class="tag">BirdCloud</span>
+      </div>
+      <div style="text-align:center;font-size:10px;margin-top:8px;color:#888;">
+        性格：好奇心旺盛・有点怕生・会对鸟说话 (´｡• ω •｡`)
+      </div>
+    </section>
+
+    <!-- 今日运势 -->
+    <section class="card">
+      <h2>今日運勢<span class="ja">うらない</span></h2>
+      <div class="fortune-row"><b>運勢</b><span>小吉</span></div>
+      <div class="fortune-row"><b>星</b><span class="stars">★★★☆☆</span></div>
+      <div class="fortune-row"><b>ラッキー色</b><span class="lucky">薄巧薄荷绿</span></div>
+      <div class="fortune-row"><b>ラッキー物</b><span class="lucky">观鸟望远镜</span></div>
+      <div style="text-align:center;font-size:10px;margin-top:8px;color:#888;">
+        今天的运势：适合去天台吹风，说不定能遇到新朋友
+      </div>
+    </section>
+  </aside>
+
+  <!-- ============ 右栏 ============ -->
+  <main>
+    <!-- WELCOME -->
+    <section class="card" id="home">
+      <h2>WELCOME<span class="ja">ようこそ</span></h2>
+      <p class="welcome-text">
+        <span class="hl">WU JIAXU</span>，一个住在天大深校园里的计算机系新生。
+        白天上课，傍晚在天台数鸟，深夜对着屏幕给 <span class="hl2">BirdCloud</span> 画下一页草图。
+        直到那本写满代码草稿的笔记本出现，一切都不一样了。
+      </p>
+      <div class="tag-row">
+        <span class="tag pink">粉色系</span>
+        <span class="tag mint">薄巧绿</span>
+        <span class="tag">鸟</span>
+        <span class="tag">代码日记</span>
+      </div>
+      <div class="divider"></div>
+      <div class="quote">
+        「有些故事，只会对找到它的人开口。」
+        <div class="who">—— 图书馆窗边的笔记本 (´｡• ω •｡`)</div>
+      </div>
+    </section>
+
+    <!-- NOW ING -->
+    <section class="card" id="now">
+      <h2>NOW<span class="ja">现在ing</span></h2>
+      <p class="welcome-text">
+        现在的我，正忙着做一件事——<span class="hl">设计 BirdCloud</span>。
+        白天在 <span class="hl2">天大深</span> 上课修习计算机，
+        傍晚去天台观鸟，深夜用 <span class="hl2">GitHub</span> 搭建网站。
+        想看我的最新作品吗？
+      </p>
+      <div class="timeline-item"><span class="day">ING 01</span><span class="arrow">→</span><span class="desc">天大深・计算机科学与技术 大一在读</span></div>
+      <div class="timeline-item"><span class="day">ING 02</span><span class="arrow">→</span><span class="desc">设计 BirdCloud 网页原型</span></div>
+      <div class="timeline-item"><span class="day">ING 03</span><span class="arrow">→</span><span class="desc">用 GitHub 发布第一版网站</span></div>
+      <div class="timeline-item"><span class="day">ING 04</span><span class="arrow">→</span><span class="desc">观鸟 & 漫画 充电中</span></div>
+      <div style="text-align:center;margin-top:12px;">
+        <a class="linkbtn" href="https://aaaagni.github.io/birdcloud/" target="_blank" rel="noopener">✈ BirdCloud 原型站</a>
+      </div>
+      <p style="font-size:11px;color:#888;text-align:center;margin-top:8px;">
+        BirdCloud —— 让每只鸟都被看见的云上小站<br>
+        施工中・会不定期更新
+      </p>
+      <div class="tag-row" style="justify-content:center;margin-top:8px;">
+        <span class="tag">GitHub</span><span class="tag">HTML</span>
+        <span class="tag">CSS</span><span class="tag">鳥</span>
+      </div>
+      <div class="quote">
+        「代码和候鸟一样，总在某个季节找到自己的方向。」
+        <div class="who">—— BirdCloud 开发日志 Plan 01</div>
+      </div>
+    </section>
+
+    <!-- TIMELINE -->
+    <section class="card">
+      <h2>TIMELINE<span class="ja">物語</span></h2>
+      <div class="timeline-item"><span class="day">PLAN 01</span><span class="arrow">→</span><span class="desc">踏入天大深校园</span></div>
+      <div class="timeline-item"><span class="day">PLAN 03</span><span class="arrow">→</span><span class="desc">BirdCloud 的第一张草图诞生</span></div>
+      <div class="timeline-item"><span class="day">PLAN 07</span><span class="arrow">→</span><span class="desc">用 GitHub 搭建起第一版网页</span></div>
+      <div class="timeline-item"><span class="day">PLAN 14</span><span class="arrow">→</span><span class="desc">在图书馆窗边记下第一次候鸟观测记录</span></div>
+      <div class="timeline-item myst"><span class="day myst">???</span><span class="arrow">→</span><span class="desc">故事继续中…</span></div>
+    </section>
+
+    <!-- GALLERY -->
+    <section class="card" id="gallery">
+      <h2>GALLERY<span class="ja">図鑑</span></h2>
+      <div class="bird-wrap">
+        <div class="bird-card">
+          <div class="bx" id="bird1"></div>
+          <div class="name">红隼? 不, 是麻雀</div>
+          <div class="latin">Passer montanus // 天台常见</div>
+        </div>
+        <div class="bird-card">
+          <div class="bx" id="bird2"></div>
+          <div class="name">翡翠鳥</div>
+          <div class="latin">Alcedo atthis // 只在漫画里见过</div>
+        </div>
+        <div class="bird-card">
+          <div class="bx" id="bird3"></div>
+          <div class="name">未来的鸟</div>
+          <div class="latin">BirdCloud 概念鸟 // 待实现</div>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:11px;margin-top:10px;color:#888;">
+        今天也在努力辨认窗外的每一只鸟 ✦
+      </p>
+    </section>
+
+    <!-- 聊天区 -->
+    <section class="chatbox" id="extra">
+      <div class="head">
+        <span class="dot"></span>
+        DIGITAL SELF // 电子屏幕背后的灵魂碎片
+        <span class="online">● online</span>
+      </div>
+      <div class="quick">
+        <button onclick="ask('你是谁？')">你是谁？</button>
+        <button onclick="ask('最近在做什么？')">最近在做什么？</button>
+        <button onclick="ask('未来方向是什么？')">未来方向？</button>
+        <button onclick="ask('BirdCloud 是什么？')">BirdCloud?</button>
+        <button onclick="ask('关于二次元属性')">二次元属性</button>
+        <button onclick="ask('还想了解更多')">还想了解更多</button>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="inputbar">
+        <input id="chatInput" type="text" placeholder="向电子屏幕背后的灵魂碎片提问…(´｡• ω •｡`)" maxlength="80">
+        <button onclick="sendMsg()">送信</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- 联系栏 -->
+<section class="card contact-card" id="contact">
+  <h2>CONTACT<span class="ja">通過魔法通道找到我</span></h2>
+  <div class="profile-row"><b>MAIL</b><span><a href="mailto:26129139d@connect.polyu.hk">26129139d@connect.polyu.hk</a></span></div>
+  <div class="profile-row"><b>GITHUB</b><span><a href="https://aaaagni.github.io" target="_blank" rel="noopener">aaaagni.github.io</a></span></div>
+  <div class="contact-note">
+    沿着粉色的光点，就能找到我 (´｡• ω •｡`)
+  </div>
+</section>
+
+<div class="marquee"><span>✦ WU_JIAXU.com ✦ 鳥とコードと薄巧 ✦ 电子屏幕背后的灵魂碎片在线 ✦ 欢迎提问 ✦ (´｡• ω •｡`) ✦ BIRDCLOUD 施工中 ✦</span></div>
+
+<footer>
+  <div style="font-size:11px;color:#888;">
+    © 2026 WU JIAXU ・ 最佳观赏分辨率 800×600 ・ 本站由 HTML + 一点点魔法构成
+  </div>
+  <div style="font-size:11px;color:#888;">(´｡• ω •｡`) ・ (ﾉ´ヮ`)ﾉ*: ･ﾟ ・ ( ˘ω˘ )</div>
+</footer>
+
+<script>
+/* ================= 像素画渲染 ================= */
+function drawPixels(box, rows, colors, w){
+  const rowsArr = rows.split('\n').map(r=>r.trim()).filter(Boolean);
+  const h = rowsArr.length;
+  box.style.gridTemplateColumns = 'repeat(' + w + ', 1fr)';
+  rowsArr.forEach(function(r){
+    for (var i = 0; i < w; i++){
+      var c = document.createElement('div');
+      c.className = 'px';
+      var ch = r[i] || '.';
+      if (colors[ch]) c.style.background = colors[ch];
+      box.appendChild(c);
+    }
+  });
+}
+
+/* ---- 头像：粉发樱花少女 16x16 ---- */
+var AV = [
+  '................',
+  '.......PPPP.....' ,
+  '.....PPPPPPPP...' ,
+  '....PPPPPPPPPP..' ,
+  '...PPPWPPPPWPPP.' ,
+  '..PPWWPPPPPPWWPP' ,
+  '..PPPPPPPPPPPPPP' ,
+  '.PPSPPPPPPPPPSP.' ,
+  '.PSSSSSSSSSSSSP.' ,
+  '.PSSESSSSSSESSP.' ,
+  '.PSSSSSSSSSSSSP.' ,
+  '.PSSCCSSSSCCSSP.' ,
+  '.PSSSSSSSSSSSSP.' ,
+  '.PPSSSSSSSSSSPP.' ,
+  '..PPPPPPPPPPPP..' ,
+  '....PPPPPPPP....'
+];
+var AV_COLORS = {
+  P:'#ff9ecb', W:'#ffffff', S:'#ffe9d6', E:'#4a4a4a', C:'#ff8fab'
+};
+
+/* ---- 像素鸟 12x10 ---- */
+function birdMatrix(body, eye, beak, leg){
+  return [
+    '.....BB.....',
+    '....BBBB....',
+    '...BBBBBB...',
+    '..BB' + eye + 'BB' + beak + 'BB..',
+    '..BBBBBBBBB..'.slice(0,12),
+    '...BBBBBBBB..',
+    '....BBBBB....',
+    '.....BBB.....',
+    '....' + leg + '...' + leg + '....',
+    '....' + leg + '...' + leg + '....'
+  ];
+}
+var B1 = birdMatrix('B','W','O','T');
+drawPixels(document.getElementById('bird1'), B1.join('\n'), {B:'#f7b731', W:'#ffffff', O:'#ff8fab', T:'#b3822e'}, 12);
+var B2 = birdMatrix('B','W','O','T');
+drawPixels(document.getElementById('bird2'), B2.join('\n'), {B:'#7ec8e3', W:'#ffffff', O:'#ff9ecb', T:'#b3822e'}, 12);
+var B3 = birdMatrix('B','W','O','T');
+drawPixels(document.getElementById('bird3'), B3.join('\n'), {B:'#b7e8d8', W:'#ffffff', O:'#ffb6c1', T:'#b3822e'}, 12);
+
+/* ================= 音乐播放器（Web Audio 合成） ================= */
+var NOTE = {
+  C3:130.81, D3:146.83, E3:164.81, F3:174.61, G3:196.00, A3:220.00, B3:246.94,
+  C4:261.63, D4:293.66, E4:329.63, F4:349.23, G4:392.00, A4:440.00, B4:493.88,
+  C5:523.25, D5:587.33, E5:659.25, F5:698.46, G5:783.99, A5:880.00, B5:987.77,
+  C6:1046.50
+};
+var BEAT = 0.62; // 舒缓三拍子
+/* 旋律：8 小节 x 3 拍 的温柔圆舞曲 */
+var MELODY = [
+  ['C5',1],['E5',1],['G5',1],
+  ['A5',1],['G5',1],['E5',1],
+  ['F5',1],['A5',1],['C6',1],
+  ['B4',1],['D5',1],['G5',1],
+  ['C5',1],['E5',1],['G5',1],
+  ['A4',1],['C5',1],['E5',1],
+  ['F4',1],['A4',1],['C5',1],
+  ['G4',1],['B4',1],['G5',3]
+];
+var BASS = [
+  ['C3',3],['A3',3],['F3',3],['G3',3],
+  ['C3',3],['A3',3],['F3',3],['G3',3]
+];
+var TOTAL = 24 * BEAT;
+
+var ctx = null, master = null, isPlaying = false, muted = false, rafId = null;
+
+function ensureCtx(){
+  if (!ctx){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.9;
+    master.connect(ctx.destination);
+  }
+  if (ctx.state === 'suspended') ctx.resume();
+  return true;
+}
+function tone(freq, t, dur, type, vol){
+  var o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.04);
+  g.gain.setValueAtTime(vol, t + Math.max(dur - 0.06, 0.05));
+  g.gain.linearRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function scheduleLoop(){
+  var t = ctx.currentTime;
+  MELODY.forEach(function(n){
+    tone(NOTE[n[0]], t, n[1]*BEAT*0.92, 'sine', 0.085);
+    t += n[1]*BEAT;
+  });
+  var tb = ctx.currentTime;
+  BASS.forEach(function(n){
+    tone(NOTE[n[0]], tb, n[1]*BEAT*0.95, 'triangle', 0.05);
+    tb += n[1]*BEAT;
+  });
+}
+function startLoop(){
+  if (!ensureCtx()) return;
+  scheduleLoop();
+  scheduleLoop(); // 预调度两轮，避免间隙
+  isPlaying = true;
+  document.getElementById('reelL').classList.add('spin');
+  document.getElementById('reelR').classList.add('spin');
+  document.getElementById('playBtn').textContent = '⏸ PAUSE';
+  if (!rafId) tick();
+}
+function pauseLoop(){
+  if (ctx && ctx.state === 'running') ctx.suspend();
+  isPlaying = false;
+  document.getElementById('reelL').classList.remove('spin');
+  document.getElementById('reelR').classList.remove('spin');
+  document.getElementById('playBtn').textContent = '▶ PLAY';
+}
+function tick(){
+  if (!ctx) return;
+  var prog = (ctx.currentTime % TOTAL) / TOTAL * 100;
+  document.getElementById('barFill').style.width = prog.toFixed(1) + '%';
+  rafId = requestAnimationFrame(tick);
+}
+document.getElementById('playBtn').addEventListener('click', function(){
+  if (isPlaying){ pauseLoop(); }
+  else{
+    if (ctx && ctx.state === 'suspended' && ctx.currentTime > 0){ ctx.resume(); isPlaying = true; document.getElementById('reelL').classList.add('spin'); document.getElementById('reelR').classList.add('spin'); document.getElementById('playBtn').textContent = '⏸ PAUSE'; }
+    else startLoop();
+  }
+});
+document.getElementById('muteBtn').addEventListener('click', function(){
+  muted = !muted;
+  if (master) master.gain.value = muted ? 0 : 0.9;
+  this.textContent = muted ? '🔇 UNMUTE' : 'MUTE';
+});
+
+/* ================= 播放器拖拽 ================= */
+var playerEl = document.querySelector('.player');
+var dragState = null;
+function clampPos(nx, ny){
+  var maxX = window.innerWidth - 20, maxY = window.innerHeight - 20;
+  nx = Math.max(8, Math.min(nx, maxX));
+  ny = Math.max(8, Math.min(ny, maxY));
+  return {x: nx, y: ny};
+}
+playerEl.addEventListener('mousedown', function(e){
+  if (e.target.closest('button')) return;
+  var r = playerEl.getBoundingClientRect();
+  playerEl.style.right = 'auto';
+  var p = clampPos(r.left, r.top);
+  playerEl.style.left = p.x + 'px';
+  playerEl.style.top = p.y + 'px';
+  playerEl.classList.add('dragging');
+  dragState = { dx: e.clientX - p.x, dy: e.clientY - p.y };
+  e.preventDefault();
+});
+playerEl.addEventListener('touchstart', function(e){
+  if (e.target.closest('button')) return;
+  var t = e.touches[0];
+  var r = playerEl.getBoundingClientRect();
+  playerEl.style.right = 'auto';
+  var p = clampPos(r.left, r.top);
+  playerEl.style.left = p.x + 'px';
+  playerEl.style.top = p.y + 'px';
+  playerEl.classList.add('dragging');
+  dragState = { dx: t.clientX - p.x, dy: t.clientY - p.y };
+  e.preventDefault();
+}, {passive:false});
+document.addEventListener('mousemove', function(e){
+  if (!dragState) return;
+  var p = clampPos(e.clientX - dragState.dx, e.clientY - dragState.dy);
+  playerEl.style.left = p.x + 'px';
+  playerEl.style.top = p.y + 'px';
+});
+document.addEventListener('touchmove', function(e){
+  if (!dragState) return;
+  var t = e.touches[0];
+  var p = clampPos(t.clientX - dragState.dx, t.clientY - dragState.dy);
+  playerEl.style.left = p.x + 'px';
+  playerEl.style.top = p.y + 'px';
+}, {passive:false});
+function endDrag(){ dragState = null; playerEl.classList.remove('dragging'); }
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('touchend', endDrag);
+
+/* ================= 电子屏幕背后的灵魂碎片 · 聊天 ================= */
+var REPLIES = {
+  who: [
+    '你好呀(´｡• ω •｡`) 我是 Wermuth！\n天津大学（港理工深圳）未来技术学院计算机科学与技术专业的大一新生。\n平时的我：上课 → 天台观鸟 → 深夜写代码。',
+    '我是 Wermuth，一只住在天大深校园里的程序猿(?) 其实是鸟！\n兴趣是观鸟、看漫画，还有设计自己的小网站～'
+  ],
+  doing: [
+    '最近在忙 BirdCloud 网页的设计！\n用 GitHub 搭站、画原型、想配色，进度一点点前进中。\n充电方式：看鸟 + 看漫画 + 吃薄巧味零食(￣▽￣)',
+    '最近的主要任务：设计 BirdCloud。\n白天上课，傍晚在天台记鸟况，晚上回家继续码 CSS。'
+  ],
+  future: [
+    '未来想往个人项目开发的方向走！\n把脑袋里一个个小点子做成真的东西。\n最近的实验品就是 BirdCloud，一只帮大家记录鸟类的云上小站。',
+    '方向大概是「个人项目开发」—— 从一个小站、一个小工具开始，慢慢攒作品集。'
+  ],
+  birdcloud: [
+    'BirdCloud 是我在做的网页项目！\n想做一个让大家记录、分享鸟类的云上小站。\n点击页面的「BirdCloud 原型站」按钮就能跳过去看看啦！\nhttps://aaaagni.github.io/birdcloud/',
+    'BirdCloud = Bird + Cloud，让每只鸟都被看见的网站。目前还是原型阶段，欢迎来逛！'
+  ],
+  bird: [
+    '观鸟超有趣的！我常去校园天台，今天也看到一只麻雀在栏杆上发呆(´｡• ω •｡`)\n以后想做一个自动识别鸟类的功能放进 BirdCloud！',
+    '最喜欢傍晚的候鸟航线。虽然现在还分不清红隼和麻雀，但我会努力的！'
+  ],
+  anime: [
+    '我的二次元属性档案(´｡• ω •｡`)\n・oc 单机人\n・推：m3 曹操与荀彧、APH 阿尔弗雷德、MLP 暮光闪闪和其他魔法属性独角兽\n・好感：Re0 奥托、血族 璐璐缇雅 & 莉萝艾\n・正在看：棋魂漫画、Re0 动画、史蒂芬宇宙大电影\n・无雷！欢迎来和我一起玩（虽然我不会主动聊天…）'
+  ],
+  more: [
+    '哎哎哎（惊）！好吧，再多告诉你一点(´｡• ω •｡`)\n你想知道什么？在下面三个里面选一个问我吧：\n・CP 属性\n・别的爱好\n・爱吃什么'
+  ],
+  cp: [
+    'emmm 我是究极杂食人，什么都可以吃下(´｡• ω •｡`)\n但还是比较偏爱：\n・m3 荀曹荀\n・aph 米英'
+  ],
+  hobby: [
+    '我还喜欢拼豆和料理！(´｡• ω •｡`)\n我做过罗宋汤和勃艮第红酒炖牛肉，还会做可可抹茶造型饼干（是 oc 的形状嘿嘿）。\n看到自己的小作品，超有成就感的！'
+  ],
+  food: [
+    '甜品！这是当之无愧的第一阿(´｡• ω •｡`)\n要是细选的话，我 choose 马卡龙！\n主食的话我选面食，什么面都爱吃！'
+  ],
+  manga: [
+    '最近在追的漫画可多了…熬夜冠军就是我( ˘ω˘ )\n看到特别喜欢的分镜，会偷偷学着画几格。',
+    '漫画是我的灵感库！有些网页配色，就是从漫画里偷师的。'
+  ],
+  hello: [
+    '欢迎光临(´｡• ω •｡`)！我是 Wermuth，武家旭的电子屏幕背后的灵魂碎片。\n可以问我：你是谁 / 最近在做什么 / 未来方向？',
+    '嗨嗨～ 想知道什么都可以问我！\n比如我的学校、兴趣，或者 BirdCloud 的故事。'
+  ],
+  school: [
+    '我在天津大学（港理工深圳）未来技术学院，读计算机科学与技术，大一！\n和代码、数学、还有数不清的鸟作伴。'
+  ],
+  fallback: [
+    '嗯嗯我在听(´｡• ω •｡`)…这个问题有点难住我了。\n你可以试试问我：「你是谁」「最近在做什么」「未来方向」或者「BirdCloud 是什么」？',
+    '唔…让我想想(。•́︿•̀。)\n换个问法试试？比如「你在做什么」「你的兴趣是什么」～'
+  ]
+};
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function classify(t){
+  if (/你是谁|介绍|自我|名字|武家旭/.test(t)) return 'who';
+  if (/未来|方向|规划|目标|打算/.test(t)) return 'future';
+  if (/最近|在做什么|忙|干嘛|项目/.test(t)) return 'doing';
+  if (/birdcloud|bird|鸟站/.test(t)) return 'birdcloud';
+  if (/鸟|麻雀|观鸟|候鸟/.test(t)) return 'bird';
+  if (/cp|杂食|曹荀|荀曹|米英/.test(t)) return 'cp';
+  if (/二次元|属性|追番|本命|推し|oc|单机人|mlp|aph|re0|血族|独角兽|暮光/.test(t)) return 'anime';
+  if (/了解更多|还想|想听|更多|继续|然后呢|还有呢|再说/.test(t)) return 'more';
+  if (/别的爱好|拼豆|料理|下厨|做饭|罗宋汤|勃艮第|做菜|烘焙/.test(t)) return 'hobby';
+  if (/爱吃什么|甜品|马卡龙|面食|主食|好吃|食物|想吃/.test(t)) return 'food';
+  if (/漫画|动漫|动画/.test(t)) return 'manga';
+  if (/学校|大学|专业|天大|计算机|大一/.test(t)) return 'school';
+  if (/你好|嗨|hello|hi|在吗|欢迎/.test(t)) return 'hello';
+  return 'fallback';
+}
+function botReply(text){
+  var key = classify(text.toLowerCase());
+  return pick(REPLIES[key]);
+}
+var msgsBox = document.getElementById('msgs');
+function appendMsg(role, text){
+  var m = document.createElement('div');
+  m.className = 'msg ' + role;
+  m.textContent = text;
+  msgsBox.appendChild(m);
+  msgsBox.scrollTop = msgsBox.scrollHeight;
+  return m;
+}
+function ask(text){
+  document.getElementById('chatInput').value = text;
+  sendMsg();
+}
+function sendMsg(){
+  var input = document.getElementById('chatInput');
+  var text = input.value.trim();
+  if (!text) return;
+  appendMsg('user', text);
+  input.value = '';
+  var t = document.createElement('div');
+  t.className = 'msg bot typing';
+  t.textContent = '…';
+  msgsBox.appendChild(t);
+  msgsBox.scrollTop = msgsBox.scrollHeight;
+  var delay = 500 + Math.random() * 500;
+  setTimeout(function(){
+    t.className = 'msg bot';
+    t.textContent = botReply(text);
+    msgsBox.scrollTop = msgsBox.scrollHeight;
+  }, delay);
+}
+document.getElementById('chatInput').addEventListener('keydown', function(e){
+  if (e.key === 'Enter') sendMsg();
+});
+
+/* 开场白 */
+setTimeout(function(){
+  appendMsg('bot', 'ようこそ(´｡• ω •｡`)！\n我是 Wermuth，武家旭的电子屏幕背后的灵魂碎片。\n你可以点下面的快捷按钮，或者直接输入问题问我～');
+}, 600);
+</script>
+</body>
+</html>
