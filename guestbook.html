@@ -442,8 +442,10 @@ function boot(){
 }
 
 /* ================= Supabase 云同步 ================= */
+/* 意见数据表：个人网页意见（中文表名，REST 路径需 URL 编码） */
+var CLOUD_TABLE = encodeURIComponent('个人网页意见');
 function apiBase(){
-  return SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/notes';
+  return SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/' + CLOUD_TABLE;
 }
 function cloudHeaders(){
   return {
@@ -634,8 +636,8 @@ function delNote(n){
   if (pw === null) return;                    /* 取消 */
   if (!pw.trim()){ toast('⚠ 未输入密码'); return; }
   if (mode === 'cloud'){
-    /* 云端：调用 Supabase RPC（服务端校验密码） */
-    fetch(SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/rpc/delete_note', {
+    /* 云端：调用 Supabase RPC（服务端校验密码，删除"个人网页意见"表中的记录） */
+    fetch(SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1/rpc/delete_feedback', {
       method: 'POST',
       headers: cloudHeaders(),
       body: JSON.stringify({ note_id: n.id, admin_password: pw.trim() })
