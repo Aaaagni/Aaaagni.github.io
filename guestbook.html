@@ -514,21 +514,22 @@ function loadFromCloud(){
       lockBoard();   /* 仅站长可见：先锁板，输入密码后才渲染便签 */
     })
     .catch(function(){
-      /* 云端失败：降级读取随站点部署的静态 guestbook-data.json，最后才用 localStorage */
+      /* 云端失败：降级读取随站点部署的静态 guestbook-data.json，最后才用 localStorage
+         注意：降级数据同样必须锁屏，保证「仅站长可见」不被绕过 */
       fetch('guestbook-data.json', {cache:'no-store'})
         .then(function(r){ if(!r.ok) throw new Error('static'); return r.json(); })
         .then(function(d){
           mode = 'server';
           var list = Array.isArray(d) ? d : ((d && d.notes) || []);
           notes = list.slice();
-          render();
-          toast('⚠ 云端同步失败，已显示静态数据中的便签');
+          lockBoard();   /* 锁屏（即使云端暂时不可用） */
+          toast('⚠ 云端暂不可用，已加载静态备份（仍仅站长可见）');
         })
         .catch(function(){
           mode = 'local';
           notes = loadLocal();
-          render();
-          toast('⚠ 云端留言同步失败，已切换为本机模式');
+          lockBoard();   /* 锁屏（即使云端暂时不可用） */
+          toast('⚠ 云端留言同步失败，已切换为本机模式（仍仅站长可见）');
         });
     });
 }
