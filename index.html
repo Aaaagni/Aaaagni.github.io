@@ -129,12 +129,99 @@
     box-shadow:5px 5px 0 rgba(74,74,74,.9);
     padding:14px; margin-bottom:18px;
     position:relative;
+    transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  }
+  /* 鼠标悬停：板块上浮 + 粉彩硬阴影 + 边框变粉 + 徽章旋转 */
+  .card:hover{
+    transform:translateY(-3px) rotate(-.4deg);
+    border-color:var(--pink-deep);
+    box-shadow:0 8px 0 var(--pink), 0 14px 22px rgba(255,143,171,.35);
+    z-index:5;
   }
   .card::before{
     content:"✦"; position:absolute; top:-12px; right:10px;
     background:var(--cream); padding:0 6px;
     border:2px solid var(--ink); color:var(--pink-deep);
+    transition:transform .3s ease, color .3s ease;
   }
+  .card:hover::before{
+    transform:rotate(180deg) scale(1.2);
+    color:var(--pink);
+  }
+  /* ============ 板块差异化悬停动效：每个板块都有自己的性格 ============ */
+  @keyframes charBreathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.05); } }
+  @keyframes swatchBlink{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
+  @keyframes rowSlide{ from{ opacity:0; transform:translateX(-12px); } to{ opacity:1; transform:none; } }
+  @keyframes tagBounce{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
+  @keyframes starGlow{ 0%,100%{ opacity:1; } 50%{ opacity:.45; text-shadow:0 0 10px var(--pink); } }
+  @keyframes luckyPulse{ 0%,100%{ color:#b3822e; } 50%{ color:var(--pink-deep); } }
+  @keyframes hlFlow{ 0%{ background-position:0% 0; } 100%{ background-position:200% 0; } }
+  @keyframes arrowPulse{ 0%,100%{ transform:translateX(0); } 50%{ transform:translateX(5px); } }
+  @keyframes btnBounce{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-3px); } }
+  @keyframes rowIn{ from{ opacity:0; transform:translateX(-14px); } to{ opacity:1; transform:none; } }
+  @keyframes mystWiggle{ 0%,100%{ transform:rotate(0); } 50%{ transform:rotate(-2.5deg); } }
+  @keyframes heroWobble{ 0%,100%{ transform:scale(1.04) rotate(0); } 25%{ transform:scale(1.06) rotate(1.2deg); } 75%{ transform:scale(1.06) rotate(-1.2deg); } }
+  @keyframes dotPulse{ 0%,100%{ box-shadow:0 0 0 2px var(--cream); } 50%{ box-shadow:0 0 0 2px var(--cream), 0 0 0 9px rgba(255,182,193,.55); } }
+  @keyframes linkGlow{ 0%,100%{ text-shadow:0 0 0 transparent; } 50%{ text-shadow:0 0 9px rgba(255,143,171,.85); } }
+  @keyframes noteNudge{ 0%,100%{ transform:translateX(0); } 25%{ transform:translateX(-2px); } 75%{ transform:translateX(2px); } }
+
+  /* ① CHARACTER：头像呼吸 + 调色板色块依次闪烁 */
+  .card:hover .pxframe img{ animation:charBreathe 1.4s ease-in-out infinite; }
+  .card:hover .palette .swatch{ animation:swatchBlink .7s steps(2) infinite; }
+  .card:hover .palette .swatch:nth-child(2){ animation-delay:.18s; }
+  .card:hover .palette .swatch:nth-child(3){ animation-delay:.36s; }
+  .card:hover .palette .swatch:nth-child(4){ animation-delay:.54s; }
+
+  /* ② PROFILE：资料行依次从左滑入 */
+  aside section.card:nth-of-type(2):hover .profile-row{ animation:rowSlide .45s ease backwards; }
+  aside section.card:nth-of-type(2):hover .profile-row:nth-of-type(2){ animation-delay:.05s; }
+  aside section.card:nth-of-type(2):hover .profile-row:nth-of-type(3){ animation-delay:.1s; }
+  aside section.card:nth-of-type(2):hover .profile-row:nth-of-type(4){ animation-delay:.15s; }
+  aside section.card:nth-of-type(2):hover .profile-row:nth-of-type(5){ animation-delay:.2s; }
+  aside section.card:nth-of-type(2):hover .profile-row:nth-of-type(6){ animation-delay:.25s; }
+  aside section.card:nth-of-type(2):hover .profile-row:nth-of-type(7){ animation-delay:.3s; }
+
+  /* ③ INTEREST：趣味标签依次弹跳 */
+  aside section.card:nth-of-type(3):hover .tag-row .tag{ animation:tagBounce .5s ease-in-out infinite; }
+  aside section.card:nth-of-type(3):hover .tag-row .tag:nth-child(2){ animation-delay:.08s; }
+  aside section.card:nth-of-type(3):hover .tag-row .tag:nth-child(3){ animation-delay:.16s; }
+  aside section.card:nth-of-type(3):hover .tag-row .tag:nth-child(4){ animation-delay:.24s; }
+
+  /* ④ 今日運勢：星星闪烁 + 幸运物变色呼吸 */
+  aside section.card:nth-of-type(4):hover .stars{ animation:starGlow .7s steps(2) infinite; }
+  aside section.card:nth-of-type(4):hover .lucky{ animation:luckyPulse 1s ease-in-out infinite; }
+
+  /* ⑤ WELCOME：高亮词流光 + 引用浮动 + 标签变粉 */
+  #home:hover .hl{ background-image:linear-gradient(90deg,var(--pink),var(--pink-dark),var(--pink)); background-size:200% 100%; animation:hlFlow 1.6s linear infinite; }
+  #home:hover .hl2{ background-image:linear-gradient(90deg,var(--mint),var(--mint-deep),var(--mint)); background-size:200% 100%; animation:hlFlow 1.6s linear infinite; }
+  #home:hover .quote{ transform:scale(1.02) rotate(-.4deg); box-shadow:4px 4px 0 var(--pink); transition:transform .3s ease, box-shadow .3s ease; }
+  #home:hover .tag-row .tag{ background:var(--pink); transition:background .3s ease; }
+
+  /* ⑥ NOW：时间线箭头脉冲 + 链接按钮弹跳 */
+  #now:hover .timeline-item .arrow{ animation:arrowPulse .9s ease-in-out infinite; }
+  #now:hover .linkbtn{ animation:btnBounce .8s ease-in-out infinite; }
+
+  /* ⑦ TIMELINE：时间线依次滑入 + ??? 行神秘摇摆 */
+  main section.card:nth-of-type(3):hover .timeline-item{ animation:rowIn .5s ease backwards; }
+  main section.card:nth-of-type(3):hover .timeline-item:nth-of-type(2){ animation-delay:.06s; }
+  main section.card:nth-of-type(3):hover .timeline-item:nth-of-type(3){ animation-delay:.12s; }
+  main section.card:nth-of-type(3):hover .timeline-item:nth-of-type(4){ animation-delay:.18s; }
+  main section.card:nth-of-type(3):hover .timeline-item:nth-of-type(5){ animation-delay:.24s; }
+  main section.card:nth-of-type(3):hover .timeline-item.myst{ animation:mystWiggle .5s ease-in-out infinite; }
+
+  /* ⑧ GALLERY：主图摇摆 */
+  #gallery:hover .gallery-hero-img img{ animation:heroWobble .9s ease-in-out infinite; }
+
+  /* ⑨ 聊天区：在线点呼吸扩散 + 快捷按钮弹跳 + 边框变粉 */
+  .chatbox{ transition:border-color .25s ease; }
+  .chatbox:hover{ border-color:var(--pink-deep); }
+  .chatbox:hover .head .dot{ animation:dotPulse .7s ease-in-out infinite; }
+  .chatbox:hover .quick button{ animation:btnBounce .6s ease-in-out infinite; }
+  .chatbox:hover .head .online{ color:var(--pink); transition:color .3s ease; }
+
+  /* ⑩ CONTACT：魔法通道流光 + 提示文字轻晃 */
+  .contact-card:hover .profile-row a{ animation:linkGlow 1.1s ease-in-out infinite; }
+  .contact-card:hover .contact-note{ animation:noteNudge 1.2s ease-in-out infinite; }
   .card h2{
     font-size:15px; letter-spacing:2px; margin-bottom:10px;
     display:inline-block;
@@ -498,7 +585,7 @@
   <div class="bar"><i id="barFill"></i></div>
   <div class="ctrl">
     <button id="playBtn" title="播放/暂停">▶ PLAY</button>
-    <button id="muteBtn" title="静音">MUTE</button>
+    <button id="skipBtn" title="下一曲">⏭ NEXT</button>
   </div>
 </div>
 
@@ -554,16 +641,34 @@
     </section>
 
     <!-- 今日运势 -->
-    <section class="card">
+    <section class="card" id="fortune">
       <h2>今日運勢<span class="ja">うらない</span></h2>
-      <div class="fortune-row"><b>運勢</b><span>小吉</span></div>
-      <div class="fortune-row"><b>星</b><span class="stars">★★★☆☆</span></div>
-      <div class="fortune-row"><b>ラッキー色</b><span class="lucky">薄巧薄荷绿</span></div>
-      <div class="fortune-row"><b>ラッキー物</b><span class="lucky">观鸟望远镜</span></div>
-      <div style="text-align:center;font-size:10px;margin-top:8px;color:#888;">
+      <div class="fortune-row"><b>運勢</b><span id="f-level">小吉</span></div>
+      <div class="fortune-row"><b>星</b><span class="stars" id="f-stars">★★★☆☆</span></div>
+      <div class="fortune-row"><b>ラッキー色</b><span class="lucky" id="f-color">薄巧薄荷绿</span></div>
+      <div class="fortune-row"><b>ラッキー物</b><span class="lucky" id="f-item">观鸟望远镜</span></div>
+      <div style="text-align:center;font-size:10px;margin-top:8px;color:#888;" id="f-msg">
         今天的运势：适合去天台吹风，说不定能遇到新朋友
       </div>
     </section>
+    <script>
+      /* ============ 今日运势：每次刷新随机一组 ============ */
+      (function(){
+        var fortunes = [
+          { level:'大吉', stars:'★★★★★', color:'樱花粉',   item:'观鸟望远镜', msg:'适合去天台吹风，说不定能遇到新朋友' },
+          { level:'中吉', stars:'★★★★☆', color:'薄巧薄荷绿', item:'漫画单行本', msg:'适合窝在窗边看书，小鸟会来敲门' },
+          { level:'小吉', stars:'★★★☆☆', color:'苦艾草绿', item:'像素羽毛',   msg:'慢慢来比较快，傍晚适合散步观鸟' },
+          { level:'吉',   stars:'★★★☆☆', color:'奶白',     item:'代码键盘',   msg:'今天写代码会有灵感，记得随手保存' },
+          { level:'末吉', stars:'★★☆☆☆', color:'墨黑',     item:'天台饼干',   msg:'运气稍弱也没关系，运气和代码一样可以重试' }
+        ];
+        var f = fortunes[(Math.random() * fortunes.length) | 0];
+        document.getElementById('f-level').textContent = f.level;
+        document.getElementById('f-stars').textContent = f.stars;
+        document.getElementById('f-color').textContent = f.color;
+        document.getElementById('f-item').textContent = f.item;
+        document.getElementById('f-msg').textContent = '今天的运势：' + f.msg;
+      })();
+    </script>
   </aside>
 
   <!-- ============ 右栏 ============ -->
@@ -756,24 +861,99 @@ var NOTE = {
   C6:1046.50
 };
 var BEAT = 0.62; // 舒缓三拍子
-/* 旋律：8 小节 x 3 拍 的温柔圆舞曲 */
-var MELODY = [
-  ['C5',1],['E5',1],['G5',1],
-  ['A5',1],['G5',1],['E5',1],
-  ['F5',1],['A5',1],['C6',1],
-  ['B4',1],['D5',1],['G5',1],
-  ['C5',1],['E5',1],['G5',1],
-  ['A4',1],['C5',1],['E5',1],
-  ['F4',1],['A4',1],['C5',1],
-  ['G4',1],['B4',1],['G5',3]
+/* 曲库：Web Audio 合成的原创旋律，8 小节 x 3 拍 */
+var SONGS = [
+  {
+    name: 'The Gypsy Bard', artist: 'Fluttershy x 星空', beat: 0.62,
+    melody: [
+      ['C5',1],['E5',1],['G5',1],
+      ['A5',1],['G5',1],['E5',1],
+      ['F5',1],['A5',1],['C6',1],
+      ['B4',1],['D5',1],['G5',1],
+      ['C5',1],['E5',1],['G5',1],
+      ['A4',1],['C5',1],['E5',1],
+      ['F4',1],['A4',1],['C5',1],
+      ['G4',1],['B4',1],['G5',3]
+    ],
+    bass: [
+      ['C3',3],['A3',3],['F3',3],['G3',3],
+      ['C3',3],['A3',3],['F3',3],['G3',3]
+    ]
+  },
+  {
+    name: 'さくら小径', artist: '都節音階・桜風', beat: 0.6,
+    melody: [
+      ['A4',1],['D5',1],['E5',1],
+      ['D5',1],['C5',1],['D5',1],
+      ['E5',1],['A5',1],['G5',1],
+      ['A5',1],['E5',1],['D5',1],
+      ['C5',1],['E5',1],['G5',1],
+      ['A5',1],['G5',1],['E5',1],
+      ['D5',1],['C5',1],['D5',1],
+      ['E5',1],['C5',1],['A4',3]
+    ],
+    bass: [
+      ['A3',3],['F3',3],['G3',3],['E3',3],
+      ['A3',3],['F3',3],['G3',3],['E3',3]
+    ]
+  },
+  {
+    name: '夜の電車', artist: 'Am 抒情・夜景', beat: 0.66,
+    melody: [
+      ['A4',1],['B4',1],['C5',1],
+      ['C5',1],['E5',1],['D5',1],
+      ['D5',1],['C5',1],['A4',1],
+      ['G4',1],['B4',1],['E5',1],
+      ['E5',1],['D5',1],['C5',1],
+      ['D5',1],['C5',1],['B4',1],
+      ['A4',1],['C5',1],['E5',1],
+      ['D5',1],['B4',1],['A4',3]
+    ],
+    bass: [
+      ['A3',3],['F3',3],['C3',3],['G3',3],
+      ['A3',3],['F3',3],['C3',3],['G3',3]
+    ]
+  },
+  {
+    name: '夏祭り', artist: '祭囃子・小調', beat: 0.5,
+    melody: [
+      ['A5',1],['G5',1],['E5',1],
+      ['C5',1],['D5',1],['E5',1],
+      ['G5',1],['E5',1],['C5',1],
+      ['D5',1],['E5',1],['A4',1],
+      ['C5',1],['D5',1],['E5',1],
+      ['A5',1],['G5',1],['E5',1],
+      ['C5',1],['D5',1],['E5',1],
+      ['G5',1],['A5',1],['E5',3]
+    ],
+    bass: [
+      ['A3',3],['F3',3],['C3',3],['G3',3],
+      ['A3',3],['F3',3],['C3',3],['G3',3]
+    ]
+  },
+  {
+    name: '猫と日曜日', artist: '琉球音階・昼下がり', beat: 0.58,
+    melody: [
+      ['C5',1],['E5',1],['F5',1],
+      ['G5',1],['F5',1],['E5',1],
+      ['B4',1],['D5',1],['F5',1],
+      ['E5',1],['C5',1],['F5',1],
+      ['C5',1],['E5',1],['F5',1],
+      ['G5',1],['B5',1],['A5',1],
+      ['G5',1],['F5',1],['E5',1],
+      ['D5',1],['C5',1],['C5',3]
+    ],
+    bass: [
+      ['C3',3],['F3',3],['G3',3],['C3',3],
+      ['C3',3],['F3',3],['G3',3],['C3',3]
+    ]
+  }
 ];
-var BASS = [
-  ['C3',3],['A3',3],['F3',3],['G3',3],
-  ['C3',3],['A3',3],['F3',3],['G3',3]
-];
-var TOTAL = 24 * BEAT;
+var songIdx = 0;
+function cur(){ return SONGS[songIdx]; }
+function totalMs(){ return 24 * cur().beat * 1000; }
 
-var ctx = null, master = null, isPlaying = false, muted = false, rafId = null, loopTimer = null;
+var ctx = null, master = null, bus = null, isPlaying = false, muted = false, rafId = null, loopTimer = null;
 
 function ensureCtx(){
   if (!ctx){
@@ -783,9 +963,23 @@ function ensureCtx(){
     master = ctx.createGain();
     master.gain.value = 0.9;
     master.connect(ctx.destination);
+    bus = ctx.createGain();
+    bus.gain.value = 0.9;
+    bus.connect(master);
   }
   if (ctx.state === 'suspended') ctx.resume();
   return true;
+}
+/* 切歌时换一条新总线：旧曲已预排的音符全部淡出，新曲干净开头 */
+function newBus(){
+  if (bus && ctx){
+    bus.gain.cancelScheduledValues(ctx.currentTime);
+    bus.gain.setValueAtTime(bus.gain.value, ctx.currentTime);
+    bus.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+  }
+  bus = ctx.createGain();
+  bus.gain.value = 0.9;
+  bus.connect(master);
 }
 function tone(freq, t, dur, type, vol){
   var o = ctx.createOscillator(), g = ctx.createGain();
@@ -794,26 +988,28 @@ function tone(freq, t, dur, type, vol){
   g.gain.linearRampToValueAtTime(vol, t + 0.04);
   g.gain.setValueAtTime(vol, t + Math.max(dur - 0.06, 0.05));
   g.gain.linearRampToValueAtTime(0.0001, t + dur);
-  o.connect(g); g.connect(master);
+  o.connect(g); g.connect(bus);
   o.start(t); o.stop(t + dur + 0.05);
 }
 function scheduleLoop(){
+  var s = cur();
   var t = ctx.currentTime;
-  MELODY.forEach(function(n){
-    tone(NOTE[n[0]], t, n[1]*BEAT*0.92, 'sine', 0.085);
-    t += n[1]*BEAT;
+  s.melody.forEach(function(n){
+    tone(NOTE[n[0]], t, n[1]*s.beat*0.92, 'sine', 0.085);
+    t += n[1]*s.beat;
   });
   var tb = ctx.currentTime;
-  BASS.forEach(function(n){
-    tone(NOTE[n[0]], tb, n[1]*BEAT*0.95, 'triangle', 0.05);
-    tb += n[1]*BEAT;
+  s.bass.forEach(function(n){
+    tone(NOTE[n[0]], tb, n[1]*s.beat*0.95, 'triangle', 0.05);
+    tb += n[1]*s.beat;
   });
   /* 循环调度：本轮播完前 0.2s 排下一轮，音乐永不间断 */
-  loopTimer = setTimeout(scheduleLoop, TOTAL * 1000 - 200);
+  loopTimer = setTimeout(scheduleLoop, totalMs() - 200);
 }
 function startLoop(){
   if (!ensureCtx()) return;
   if (loopTimer) clearTimeout(loopTimer);
+  newBus();
   scheduleLoop();
   isPlaying = true;
   document.getElementById('reelL').classList.add('spin');
@@ -831,21 +1027,29 @@ function pauseLoop(){
 }
 function tick(){
   if (!ctx) return;
-  var prog = (ctx.currentTime % TOTAL) / TOTAL * 100;
+  var tot = totalMs() / 1000;
+  var prog = (ctx.currentTime % tot) / tot * 100;
   document.getElementById('barFill').style.width = prog.toFixed(1) + '%';
   rafId = requestAnimationFrame(tick);
 }
 document.getElementById('playBtn').addEventListener('click', function(){
   if (isPlaying){ pauseLoop(); }
   else{
-    if (ctx && ctx.state === 'suspended' && ctx.currentTime > 0){ ctx.resume(); isPlaying = true; document.getElementById('reelL').classList.add('spin'); document.getElementById('reelR').classList.add('spin'); document.getElementById('playBtn').textContent = '⏸ PAUSE'; var remainMs = TOTAL*1000 - ((ctx.currentTime % TOTAL)*1000); loopTimer = setTimeout(scheduleLoop, Math.max(remainMs - 200, 100)); }
+    if (ctx && ctx.state === 'suspended' && ctx.currentTime > 0){ ctx.resume(); isPlaying = true; document.getElementById('reelL').classList.add('spin'); document.getElementById('reelR').classList.add('spin'); document.getElementById('playBtn').textContent = '⏸ PAUSE'; var remainMs = totalMs() - ((ctx.currentTime % (totalMs()/1000))*1000); loopTimer = setTimeout(scheduleLoop, Math.max(remainMs - 200, 100)); }
     else startLoop();
   }
 });
-document.getElementById('muteBtn').addEventListener('click', function(){
-  muted = !muted;
-  if (master) master.gain.value = muted ? 0 : 0.9;
-  this.textContent = muted ? '🔇 UNMUTE' : 'MUTE';
+/* 下一曲：曲库循环切换，旧曲淡出新曲从头播 */
+document.getElementById('skipBtn').addEventListener('click', function(){
+  songIdx = (songIdx + 1) % SONGS.length;
+  var s = cur();
+  document.querySelector('.player .song').textContent = s.name;
+  document.querySelector('.player .artist').textContent = s.artist;
+  if (isPlaying){
+    if (loopTimer) clearTimeout(loopTimer);
+    newBus();
+    scheduleLoop();
+  }
 });
 
 /* ================= 播放器拖拽 ================= */
