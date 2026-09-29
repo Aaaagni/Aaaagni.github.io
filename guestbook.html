@@ -544,6 +544,21 @@ function cloudHeaders(){
     'Content-Type': 'application/json'
   };
 }
+/* ================= 防暂停探活 ================= */
+/* 免费项目连续约 7 天无 API 活动会被自动暂停。每次页面加载静默 ping 一次
+   check_admin_password RPC（无副作用），保持项目"活着"。
+   配合 UptimeRobot 等定时监控 guestbook 页面，即使你不打开网站也能持续探活。 */
+function keepAlive(){
+  if (!(SUPABASE_URL && SUPABASE_ANON_KEY)) return;
+  try{
+    fetch(rpcUrl('check_admin_password'), {
+      method: 'POST',
+      headers: cloudHeaders(),
+      body: JSON.stringify({ admin_password: '' })
+    }).catch(function(){ /* 静默：探活失败不影响页面功能 */ });
+  }catch(e){}
+}
+keepAlive();
 function fmtTime(iso){
   try{
     var d = new Date(iso);
