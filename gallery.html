@@ -569,9 +569,9 @@ var galleryPanels = {
   wormwood: document.getElementById('panel-wormwood'),
   mystery: document.getElementById('panel-mystery')
 };
-galleryTabs.forEach(function(tab){
+Array.prototype.forEach.call(galleryTabs, function(tab){
   tab.addEventListener('click', function(){
-    galleryTabs.forEach(function(t){
+    Array.prototype.forEach.call(galleryTabs, function(t){
       t.classList.remove('active');
       t.setAttribute('aria-selected', 'false');
     });
@@ -595,7 +595,7 @@ galleryTabs.forEach(function(tab){
     var cards = panel.querySelectorAll('.photo-card');
     if (!cards.length) return;
     var items = [];
-    cards.forEach(function(card){
+    Array.prototype.forEach.call(cards, function(card){
       var img = card.querySelector('img');
       var name = card.querySelector('.name');
       var latin = card.querySelector('.latin');
@@ -608,60 +608,66 @@ galleryTabs.forEach(function(tab){
         note: note  ? note.textContent : ''
       });
     });
-    panel.querySelector('.photo-wrap').style.display = 'none';
+    var wrap = panel.querySelector('.photo-wrap');
+    try {
+      var car = document.createElement('div');
+      car.className = 'carousel';
+      car.innerHTML =
+        '<div class="carousel-frame"><img alt=""></div>' +
+        '<div class="carousel-name"></div>' +
+        '<div class="carousel-latin"></div>' +
+        '<div class="carousel-note"></div>' +
+        '<div class="carousel-controls">' +
+          '<button type="button" class="carousel-btn prev" aria-label="上一张">‹</button>' +
+          '<span class="carousel-counter"></span>' +
+          '<button type="button" class="carousel-btn next" aria-label="下一张">›</button>' +
+        '</div>';
+      panel.insertBefore(car, wrap);
 
-    var car = document.createElement('div');
-    car.className = 'carousel';
-    car.innerHTML =
-      '<div class="carousel-frame"><img alt=""></div>' +
-      '<div class="carousel-name"></div>' +
-      '<div class="carousel-latin"></div>' +
-      '<div class="carousel-note"></div>' +
-      '<div class="carousel-controls">' +
-        '<button type="button" class="carousel-btn prev" aria-label="上一张">‹</button>' +
-        '<span class="carousel-counter"></span>' +
-        '<button type="button" class="carousel-btn next" aria-label="下一张">›</button>' +
-      '</div>';
-    panel.insertBefore(car, panel.querySelector('.photo-wrap'));
+      var frameImg = car.querySelector('.carousel-frame img');
+      if (panel.id === 'panel-wormwood') frameImg.classList.add('pixelated');
+      var nameEl   = car.querySelector('.carousel-name');
+      var latinEl  = car.querySelector('.carousel-latin');
+      var noteEl   = car.querySelector('.carousel-note');
+      var counter  = car.querySelector('.carousel-counter');
+      var idx = 0;
 
-    var frameImg = car.querySelector('.carousel-frame img');
-    if (panel.id === 'panel-wormwood') frameImg.classList.add('pixelated');
-    var nameEl   = car.querySelector('.carousel-name');
-    var latinEl  = car.querySelector('.carousel-latin');
-    var noteEl   = car.querySelector('.carousel-note');
-    var counter  = car.querySelector('.carousel-counter');
-    var idx = 0;
+      function show(i){
+        idx = (i + items.length) % items.length;
+        frameImg.src = items[idx].src;
+        frameImg.alt = items[idx].alt;
+        nameEl.textContent = items[idx].name;
+        nameEl.style.display = items[idx].name ? 'block' : 'none';
+        latinEl.textContent = items[idx].latin;
+        latinEl.style.display = items[idx].latin ? 'block' : 'none';
+        noteEl.textContent = items[idx].note;
+        noteEl.style.display = items[idx].note ? 'block' : 'none';
+        counter.textContent = (idx + 1) + ' / ' + items.length;
+      }
+      car.querySelector('.prev').addEventListener('click', function(){ show(idx - 1); });
+      car.querySelector('.next').addEventListener('click', function(){ show(idx + 1); });
+      /* 手机端：左右滑动切换 */
+      var touchX = null;
+      car.addEventListener('touchstart', function(e){
+        touchX = e.touches[0].clientX;
+      }, { passive:true });
+      car.addEventListener('touchend', function(e){
+        if (touchX === null) return;
+        var dx = e.changedTouches[0].clientX - touchX;
+        if (dx > 40) show(idx - 1);
+        else if (dx < -40) show(idx + 1);
+        touchX = null;
+      }, { passive:true });
 
-    function show(i){
-      idx = (i + items.length) % items.length;
-      frameImg.src = items[idx].src;
-      frameImg.alt = items[idx].alt;
-      nameEl.textContent = items[idx].name;
-      nameEl.style.display = items[idx].name ? 'block' : 'none';
-      latinEl.textContent = items[idx].latin;
-      latinEl.style.display = items[idx].latin ? 'block' : 'none';
-      noteEl.textContent = items[idx].note;
-      noteEl.style.display = items[idx].note ? 'block' : 'none';
-      counter.textContent = (idx + 1) + ' / ' + items.length;
+      show(0);
+      /* 轮播构建就绪后，再隐藏平铺的照片列表 */
+      if (wrap) wrap.style.display = 'none';
+    } catch(err){
+      /* 兜底：任何设备特性导致轮播构建失败时，保持平铺展示，相册依然可用 */
+      if (wrap) wrap.style.display = '';
     }
-    car.querySelector('.prev').addEventListener('click', function(){ show(idx - 1); });
-    car.querySelector('.next').addEventListener('click', function(){ show(idx + 1); });
-    /* 手机端：左右滑动切换 */
-    var touchX = null;
-    car.addEventListener('touchstart', function(e){
-      touchX = e.touches[0].clientX;
-    }, { passive:true });
-    car.addEventListener('touchend', function(e){
-      if (touchX === null) return;
-      var dx = e.changedTouches[0].clientX - touchX;
-      if (dx > 40) show(idx - 1);
-      else if (dx < -40) show(idx + 1);
-      touchX = null;
-    }, { passive:true });
-
-    show(0);
   }
-  ['feather','wormwood','mystery'].forEach(function(key){
+  Array.prototype.forEach.call(['feather','wormwood','mystery'], function(key){
     var panel = document.getElementById('panel-' + key);
     if (panel) buildCarousel(panel);
   });
