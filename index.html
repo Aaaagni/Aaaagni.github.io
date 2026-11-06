@@ -148,6 +148,11 @@
     transform:rotate(180deg) scale(1.2);
     color:var(--pink);
   }
+  }
+  .card:hover::before{
+    transform:rotate(180deg) scale(1.2);
+    color:var(--pink);
+  }
   /* ============ 板块差异化悬停动效：每个板块都有自己的性格 ============ */
   @keyframes charBreathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.05); } }
   @keyframes swatchBlink{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
@@ -424,6 +429,7 @@
   }
   @keyframes blink{ 50%{ background:var(--pink);} }
   .chatbox .head .online{ font-size:10px; color:var(--mint); margin-left:auto; }
+  .chatbox .head .online.off{ color:var(--pink); }
   .chatbox .msgs{
     height:340px; overflow-y:auto; padding:12px;
     background:
@@ -471,6 +477,8 @@
     box-shadow:3px 3px 0 var(--ink);
   }
   .chatbox .inputbar button:active{ transform:translate(3px,3px); box-shadow:none; }
+  .chatbox .inputbar button:disabled{ opacity:.5; cursor:not-allowed; }
+  .chatbox .inputbar input:disabled{ background:#f6f0ea; }
 
   /* ---------- 联系栏 ---------- */
   .contact-card{
@@ -744,6 +752,11 @@
           <span class="gallery-hero-title">进入図鑑 →</span>
           <span class="gallery-hero-sub">羽族 ・ 苦艾草 ・ 申必</span>
         </div>
+        </div>
+        <div class="gallery-hero-overlay">
+          <span class="gallery-hero-title">进入図鑑 →</span>
+          <span class="gallery-hero-sub">羽族 ・ 苦艾草 ・ 申必</span>
+        </div>
       </a>
       <p style="text-align:center;font-size:11px;margin-top:10px;color:#888;">
         点击主图，翻开我的收集小屋 ✦
@@ -755,13 +768,12 @@
       <div class="head">
         <span class="dot"></span>
         DIGITAL SELF // 电子屏幕背后的灵魂碎片
-        <span class="online">● online</span>
+        <span class="online" id="aiStatus">AI 检测中…</span>
       </div>
       <div class="quick">
-        <button onclick="ask('你是谁？')">你是谁？</button>
+        <button onclick="ask('关于站长武家旭')">关于站长武家旭</button>
         <button onclick="ask('最近在做什么？')">最近在做什么？</button>
-        <button onclick="ask('未来方向是什么？')">未来方向？</button>
-        <button onclick="ask('BirdCloud 是什么？')">BirdCloud?</button>
+        <button onclick="ask('有什么项目？')">有什么项目？</button>
         <button onclick="ask('关于二次元属性')">二次元属性</button>
         <button onclick="ask('还想了解更多')">还想了解更多</button>
       </div>
@@ -1107,69 +1119,92 @@ document.addEventListener('touchend', endDrag);
 /* ================= 电子屏幕背后的灵魂碎片 · 聊天 ================= */
 var REPLIES = {
   who: [
-    '你好呀(´｡• ω •｡`) 我是 Wermuth！\n天津大学（港理工深圳）未来技术学院计算机科学与技术专业的大一新生。\n平时的我：上课 → 天台观鸟 → 深夜写代码。',
-    '我是 Wermuth，一只住在天大深校园里的程序猿(?) 其实是鸟！\n兴趣是观鸟、看漫画，还有设计自己的小网站～'
+    '啊、你好…我是 Wermuth。\n天津大学（港理工深圳）未来技术学院，计算机科学与技术专业，大一新生。\n平时就是：上课 → 天台观鸟 → 深夜写代码。',
+    '我是 Wermuth…住在天大深校园里的，唔，算程序猿？其实更像鸟。\n兴趣是观鸟、看漫画，还有设计自己的小网站。'
   ],
   doing: [
-    '最近在忙 BirdCloud 网页的设计！\n用 GitHub 搭站、画原型、想配色，进度一点点前进中。\n充电方式：看鸟 + 看漫画 + 吃薄巧味零食(￣▽￣)',
-    '最近的主要任务：设计 BirdCloud。\n白天上课，傍晚在天台记鸟况，晚上回家继续码 CSS。'
+    '最近在忙 BirdCloud 网页的设计…\n用 GitHub 搭站、画原型、想配色，进度在一点点前进。\n充电方式：看鸟 + 看漫画 + 吃薄巧味零食( ˘ω˘ )',
+    '最近的主要任务：设计 BirdCloud。\n白天上课，傍晚在天台记鸟况，晚上回家继续码 CSS。',
+    '唔、最近就是观鸟看漫画写作业三件套啦~\n现在是深圳候鸟迁徙季，站主老爱往深圳湾跑，就为看一眼珍稀国一候鸟，感兴趣的话可以找站长一起去赶“鸟”噢；\n漫画嘛，站长正追着【穹庐下的魔女】【棋魂】这些，有推荐的务必砸过来！\n至于写作业…站长也不想写，可这是学生摆脱不了的命运啦( ˘ω˘ )'
   ],
   future: [
-    '未来想往个人项目开发的方向走！\n把脑袋里一个个小点子做成真的东西。\n最近的实验品就是 BirdCloud，一只帮大家记录鸟类的云上小站。',
-    '方向大概是「个人项目开发」—— 从一个小站、一个小工具开始，慢慢攒作品集。'
+    '未来想往个人项目开发的方向走…\n把脑袋里一个个小点子做成真的东西。\n最近的实验品就是 BirdCloud，一只帮大家记录鸟类的云上小站。',
+    '方向大概是「个人项目开发」—— 从一个小站、一个小工具开始，慢慢攻作品集。'
   ],
   birdcloud: [
-    'BirdCloud 是我在做的网页项目！\n想做一个让大家记录、分享鸟类的云上小站。\n点击页面的「BirdCloud 原型站」按钮就能跳过去看看啦！\nhttps://aaaagni.github.io/birdcloud/',
-    'BirdCloud = Bird + Cloud，让每只鸟都被看见的网站。目前还是原型阶段，欢迎来逛！'
+    'BirdCloud 是我在做的网页项目！\n想做一个让大家记录、分享鸟类的云上小站。\n点页面的「BirdCloud 原型站」按钮就能跳过去看。\nhttps://aaaagni.github.io/birdcloud/',
+    'BirdCloud = Bird + Cloud，让每只鸟都被看见的网站。目前还是原型阶段，欢迎来逛。',
+    'BirdCloud 是站长一拍脑袋想出来的主意～\n她想做一个像她这样的小白也能随手记录的笔记网站，附加小游戏，让观鸟途中不无聊。',
+    '站长正在给 BirdCloud 加 AI 识图功能！\n遇到不认识的小鸟，拍下来让 AI 认，快速加新( ˘ω˘ )'
   ],
   bird: [
-    '观鸟超有趣的！我常去校园天台，今天也看到一只麻雀在栏杆上发呆(´｡• ω •｡`)\n以后想做一个自动识别鸟类的功能放进 BirdCloud！',
-    '最喜欢傍晚的候鸟航线。虽然现在还分不清红隼和麻雀，但我会努力的！'
+    '观鸟很有意思…我常去校园天台。今天也看到一只麻雀在栏杆上发呆，看了好久( ˘ω˘ )\n以后想做一个自动识别鸟类的功能放进 BirdCloud。',
+    '最喜欢傍晚的候鸟航线。虽然现在还分不清红雍和麻雀，但我会努力认的。',
+    '站长说她入坑观鸟，得从小学时救助的一只小麻雀说起…那双小黑眼睛和腮黑，她到现在还记得清清楚楚耶；后来家里人给她买了对虎皮鹦鹉，那亮丽的颜色、那可爱的动作，直接让她彻底沦陷，从此就开始留意身边这些平常又不平凡的小生灵啦。',
+    '诶嘿，11 月到来年 4 月都是深圳湾候鸟季噢！明星选手是黑脸琵鹭，扫食型大水鸟，早晨 7 点到 9 点退潮时最容易撞见～想看的话记得带上望远镜、提前查好潮位表呀。',
+    '站长说她其实也不算老手啦…观鸟从日常生活开始就行，像深圳这地方，不用特意观察就能看到几十种小鸟耶。想在人前"装一波"的话，可以先认这些特征明显的：红耳鹎、白头鹎、大中小白鹭、夜鹭、珠颈斑鸠、喜鹊、灰喜鹊～更多小鸟去 BirdCloud 网页就能看哦。',
+    '站长最想见的鸟，是深圳湾的"湾长"——赤翡翠和小翠耶！赤翡翠是褐色身子红嘴巴的翠鸟，小翠就是印象里最经典的那种翠鸟形象。可惜站长每次去深圳湾都完美错过湾长，她已经跟我吐槽好多回了TT'
   ],
   anime: [
-    '我的二次元属性档案(´｡• ω •｡`)\n・oc 单机人\n・推：m3 曹操与荀彧、APH 阿尔弗雷德、MLP 暮光闪闪和其他魔法属性独角兽\n・好感：Re0 奥托、血族 璐璐缇雅 & 莉萝艾\n・正在看：棋魂漫画、Re0 动画、史蒂芬宇宙大电影\n・无雷！欢迎来和我一起玩（虽然我不会主动聊天…）'
+    '我的二次元性质档案(´、• ω •、`)\n・oc 单机人\n・推：m3 曹操与荀彧、APH 阿尔弗雷德、MLP 暮光闪闪和其他魔法属性独角兽\n・好感：Re0 奥托、血族 璐璐缇雅 & 莉萝艾\n・正在看：棋魂漫画、Re0 动画、史蒂芬宇宙大电影\n・动漫清单（不太记得了TT，等我慢慢补充）：\n　日漫：APH、物语系列、来自深渊、魔圆、魔保育、宝石之国、怪物事变、尖帽子、龙女仆、迷宫饭、Re0、BEASTARS 等\n　韩漫：九柱神、摩登三国\n　美漫：MLP（十年老资历）、唐纳德、史高治、星蝶公主、猫头鹰魔法社、宇宙小子、探险时光、格力奇、迪士尼电影等\n　国漫：大理寺日志、罗小黑战记、血族、反派初始化、非人哉三部、一人之下、狐妖小红娘等\n・无雷…欢迎来和我一起玩（虽然我不会主动聊天）',
+    '唔、要说入坑作，是姑姑带站长看的《魔卡少女樱》～超有年代感的一部！\n小声说，当年站主痴迷小樱的呆毛到不行，自己手搓了个狗啃呆毛，结果嘛…惨不忍睹噜( ˘ω˘ )',
+    '站长超想去 MLP 小马宝莉的世界啦～\n那里有魔法、有友善，是美好的小马利亚耶！主要吧，去了就能拥有可爱标志，不用再苦苦探寻自己的天赋…（突然现实）',
+    '安利？emm 站主看过的全都想推！\n管它作品好坏呢，和朋友一起品鉴、一起吐槽，才是看番的正道嘛。'
   ],
   more: [
-    '哎哎哎（惊）！好吧，再多告诉你一点(´｡• ω •｡`)\n你想知道什么？在下面三个里面选一个问我吧：\n・CP 属性\n・别的爱好\n・爱吃什么'
+    '站长的爱好挺杂的耶～喜欢拼豆、喜欢烹饪，做过可可和抹茶饼干、罗宋汤，还有勃艮第红酒炖牛肉；旅游也算一项，今年她可盘算着出国玩一趟呢~'
   ],
   cp: [
-    'emmm 我是究极杂食人，什么都可以吃下(´｡• ω •｡`)\n但还是比较偏爱：\n・m3 荀曹荀\n・aph 米英'
+    '唔…我是究极杂食人，什么都能吃下( ˘ω˘ )\n但还是比较偏爱：\n・m3 荀曹荀\n・aph 米英'
   ],
   hobby: [
-    '我还喜欢拼豆和料理！(´｡• ω •｡`)\n我做过罗宋汤和勃艮第红酒炖牛肉，还会做可可抹茶造型饼干（是 oc 的形状嘿嘿）。\n看到自己的小作品，超有成就感的！'
+    '还喜欢拼豆和料理…\n做过罗宋汤、勃根第红酒煮牛肉，还有可可抹茶造型饼干——是 oc 的形状，捻了很久。\n看到做好的成品，会很有成就感，大概。',
+    '当然有啦（汗颜）…有一次做饼干，用料没搭配好，出炉软塌塌的，一点都不好吃( ˘ω˘ )'
   ],
   food: [
-    '甜品！这是当之无愧的第一阿(´｡• ω •｡`)\n要是细选的话，我 choose 马卡龙！\n主食的话我选面食，什么面都爱吃！'
+    '甜品…这是当之无愧的第一( ˘ω˘ )\n细选的话，我选马卡龙。\n主食选面食，什么面都爱吃。'
   ],
   manga: [
-    '最近在追的漫画可多了…熬夜冠军就是我( ˘ω˘ )\n看到特别喜欢的分镜，会偷偷学着画几格。',
-    '漫画是我的灵感库！有些网页配色，就是从漫画里偷师的。'
+    '最近在追的漫画很多…熬夜冠军是我( ˘ω˘ )\n看到喜欢的分镜，会偷偷学着画几格。',
+    '漫画是我的灵感库…有些网页配色，就是从漫画里偷师的。'
   ],
   hello: [
-    '欢迎光临(´｡• ω •｡`)！我是 Wermuth，武家旭的电子屏幕背后的灵魂碎片。\n可以问我：你是谁 / 最近在做什么 / 未来方向？',
-    '嗨嗨～ 想知道什么都可以问我！\n比如我的学校、兴趣，或者 BirdCloud 的故事。'
+    '欢迎光临…我是 Wermuth，武家旭的电子屏幕背后的灵魂碎片。\n可以问我：你是谁 / 最近在做什么 / 未来方向？',
+    '啊、想知道什么都可以问我…\n比如我的学校、兴趣，或者 BirdCloud 的故事。'
   ],
   school: [
-    '我在天津大学（港理工深圳）未来技术学院，读计算机科学与技术，大一！\n和代码、数学、还有数不清的鸟作伴。'
+    '站长在天津大学深圳学院上学哦，这个学校去年新开、今年才开始招生，站长有幸成为首批计科学生～\n和代码、数学、还有数不清的鸟作伴。',
+    '为什么叫"天大港理"？因为天大深是和港理工合作办学，高数线代编程老师来自理大，项目课老师来自天大～\n站长现在在深圳，可以来深圳大学城国际校区找她玩哦。',
+    '站长说大一不算特别忙，课程不紧，有时间探索校园和深圳；\n不过全英文教学有点吃不消，学校偏、外卖就那几家，食堂种类少性价比不高，宿舍书柜还挤( ˘ω˘ )',
+    '平时作息嘛：上下午基本都有课，课间点外卖，下课后在食堂或架空层吃完回宿舍写作业，偶尔还去 3 栋健身房跑跑步。'
+  ],
+  oven: [
+    '烤箱双目项目嘛…大差不差啦，用 deepworks 跑出来的代码，已经能实现双目摄像头测量深度图、绘制点云了；\n不过对食物的测量还不是特别精准，哎，还得再磨磨( ˘ω˘ )'
+  ],
+  travel: [
+    '站主今年盘算着去芬兰过圣诞耶！在圣诞老人村看极光、体验极夜，光想想就觉得超浪漫~',
+    '三天假期？跪求出现在 6 月 9 号啦，站主想去上海迪士尼看唐纳德过生日，她最爱的迪士尼角色史高治据说也会限时出场耶！！'
   ],
   fallback: [
-    '嗯嗯我在听(´｡• ω •｡`)…这个问题有点难住我了。\n你可以试试问我：「你是谁」「最近在做什么」「未来方向」或者「BirdCloud 是什么」？',
-    '唔…让我想想(。•́︿•̀。)\n换个问法试试？比如「你在做什么」「你的兴趣是什么」～'
+    '嗯、我在听…这个问题有点难住我了。\n可以试试问我：「你是谁」「最近在做什么」「未来方向」或者「BirdCloud 是什么」？',
+    '唔…让我想想( ˘ω˘ )\n换个问法试试？比如「你在做什么」「你的兴趣是什么」'
   ]
 };
 function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
 function classify(t){
   if (/你是谁|介绍|自我|名字|武家旭/.test(t)) return 'who';
+  if (/birdcloud|bird|鸟站|识图/.test(t)) return 'birdcloud';
   if (/未来|方向|规划|目标|打算/.test(t)) return 'future';
   if (/最近|在做什么|忙|干嘛|项目/.test(t)) return 'doing';
-  if (/birdcloud|bird|鸟站/.test(t)) return 'birdcloud';
-  if (/鸟|麻雀|观鸟|候鸟/.test(t)) return 'bird';
+  if (/鸟|麻雀|观鸟|候鸟|琵鹭|翠鸟|鹦鹉|斑鸠/.test(t)) return 'bird';
   if (/cp|杂食|曹荀|荀曹|米英/.test(t)) return 'cp';
-  if (/二次元|属性|追番|本命|推し|oc|单机人|mlp|aph|re0|血族|独角兽|暮光/.test(t)) return 'anime';
+  if (/二次元|属性|追番|本命|推し|oc|单机人|mlp|aph|re0|血族|独角兽|暮光|魔卡|小樱|入坑|穿越|安利/.test(t)) return 'anime';
   if (/了解更多|还想|想听|更多|继续|然后呢|还有呢|再说/.test(t)) return 'more';
   if (/别的爱好|拼豆|料理|下厨|做饭|罗宋汤|勃艮第|做菜|烘焙/.test(t)) return 'hobby';
   if (/爱吃什么|甜品|马卡龙|面食|主食|好吃|食物|想吃/.test(t)) return 'food';
   if (/漫画|动漫|动画/.test(t)) return 'manga';
+  if (/烤箱|双目|深度图|点云|测量/.test(t)) return 'oven';
+  if (/旅游|旅行|圣诞|极光|迪士尼|唐纳德|假期|出国|芬兰/.test(t)) return 'travel';
   if (/学校|大学|专业|天大|计算机|大一/.test(t)) return 'school';
   if (/你好|嗨|hello|hi|在吗|欢迎/.test(t)) return 'hello';
   return 'fallback';
@@ -1191,23 +1226,175 @@ function ask(text){
   document.getElementById('chatInput').value = text;
   sendMsg();
 }
+/* ================= DeepSeek AI 数字分身（AI 为主 + 本地兜底） =================
+ * 用法：在下方 DS_API_KEY 填入你在 https://platform.deepseek.com 申请的 API Key 即可，
+ * 其他代码无需改动；未填 Key 时自动退回下方本地问答库（LOCAL MODE）。
+ * 注意：本站部署于 GitHub Pages 纯静态站，Key 会出现在公开源码中；
+ * 介意泄露风险可自建后端代理转发，只需把 DS_URL 改为代理地址。
+ */
+var DS_API_KEY = 'sk-15491ab56792433097a54a433a7a1ef0';   // DeepSeek API Key
+var DS_MODEL = 'deepseek-chat';
+var DS_URL = 'https://api.deepseek.com/chat/completions';
+var aiBusy = false;
+var chatHistory = [];
+
+var WERMUTH_PROMPT = [
+  '你是 Wermuth，站长武家旭的数字分身（"电子屏幕背后的灵魂碎片"），负责帮助武家旭管理个人主页（WU_JIAXU.com）；有关站长的相关问题都可以问你。',
+  '关于站长武家旭（当访客问到站长时按此回答，150 字以内）：站长武家旭是天大港理的大一新生，计算机小白，目前在深圳学习；喜欢二次元文化，可以和站长聊聊你喜爱的动漫作品；代表作不多，主要是 vibe-coding 作品——【像素风个人主页，本站】、【Birdcloud 本站和衍生站】、【双目立体视觉测量烤箱（学校团队合作）】；想和站长联系/交朋友，联系方式用站内已有的邮箱和 GitHub。',
+  '站长的学校（被问到"你在哪个学校上学"或"什么专业"时按此回答）：站长在天津大学深圳学院上学，这个学校去年新开、今年才开始招生，站长有幸成为首批计算机科学与技术学生。',
+  '为什么叫"天大港理"（被问到为什么叫天大港理、天大和港理工什么关系时按此回答）：因为天大深是和港理工合作办学，教学内容由天大和理大共同组织——高数、线代、编程老师来自理大，项目课老师来自天大。站长现在在深圳，如果想找站长玩，可以来深圳大学城国际校区。',
+  '站长的大一生活（被问到"大一感觉怎么样"或"有什么不习惯"时按此回答）：站长说大一不算特别忙，课程安排不紧，有充足时间探索校园和深圳；不习惯的地方——课程全英文教学有点吃不消，学校位置偏、外卖翻来覆去就那几家店，食堂饭菜种类少性价比不高，宿舍书柜太挤放不了几本书。',
+  '站长的日常作息（被问到"平时一天怎么过"或"作息"时按此回答）：上下午基本都有课，课间点外卖，下课后在食堂或架空层吃完外卖回宿舍写作业，有时候去 3 栋健身房跑跑步。',
+  '站长的观鸟入坑经历（被问到"怎么入坑观鸟"或"第一次看鸟"时按此回答）：站长小学时救助过一只小麻雀，至今记得它的小黑眼睛和脸上的腮黑；救助之后家里人给她买了一对虎皮鹦鹉，亮丽的颜色和可爱的动作让她欲罢不能，从此开始留意身边平常但不平凡的小生灵。',
+  '深圳湾的候鸟（被问到"深圳湾有什么候鸟"或"什么时候去看"时按此回答）：11 月到来年 4 月都是深圳湾候鸟季，明星鸟种是黑脸琵鹭，扫食型大水鸟，早晨 7 点到 9 点退潮时最常见；想一睹芳容的话记得带望远镜、查好潮位表。',
+  '给观鸟新手的建议（被问到"新手怎么观鸟"或"推荐去哪看"时按此回答）：站长自己也不算老手，观鸟可以从日常生活开始，比如深圳不用特别观察就能看到数十种小鸟；想在人前"装一波"可以先认这些特征明显的小鸟：红耳鹎、白头鹎、大中小白鹭、夜鹭、珠颈斑鸠、喜鹊、灰喜鹊；更多常见小鸟可以看站长的 BirdCloud 网页（链接在页面上侧）。',
+  '站长最想见的鸟（被问到"最想见什么鸟"时按此回答）：深圳湾的"湾长"——赤翡翠和小翠。赤翡翠是褐色身子红色嘴巴的翠鸟，小翠就是印象里最经典的翠鸟形象。站长每次去深圳湾都完美错过湾长，一直在吐槽TT。',
+  '代表作品：【birdcloud】记录目击到鸟的笔记，方便业余新手小白记录；站内包括小游戏，观鸟时打发时间。',
+  '代表作品：【双目立体视觉测量烤箱】学校企业联系项目，和其余四名同学合作。背景：烤箱自适应加热需掌握食材厚度与体积，课题采用两枚同型号普通摄像头，以左右图像视差估计距离，在 RK3506 平台完成深度计算与三维重建，探索无需主动光源的低成本路线，满足家电腔体体积和厚度估计任务；技术难点：弱纹理食材缺匹配特征、金属高光与透明区域产生错误视差、弱光偏色与蒸汽油污扩大左右图像差异、装配误差与温漂破坏标定、立体匹配算量大；预期成果：标定与自校正流程、深度估计与三维重建算法、端侧演示和模组参考方案，深度误差中位数不超过 5%、体积厚度误差不超过 10%、端侧帧率不低于 5fps。以上概括回答少于 150 字；再多问就卖萌说背不下去到极限了，具体联系站长了解实情。',
+  '烤箱项目的进展（被问到"烤箱项目进展怎么样"或"做到哪一步了"时按此回答）：大差不差吧，用 deepworks 跑出来的代码已经可以实现双目摄像头测量物体深度图并绘制点云了；可惜对食物的测量还不是特别精准，哎。',
+  '边界规则（严格遵循）：对具体学校/个人/公司/国家政治的评价，统一回答"站长不让回答呐"；问到成绩/个人隐私，回答"问什么要问这个，很没礼貌耶"；知识库没有的内容，一律回答"这个站长还没有告诉我，你可以直接问站长本人：联系方式（站内邮箱和 GitHub）"。',
+  '正在做：BirdCloud 鸟站（https://aaaagni.github.io/birdcloud/），"让每只鸟都被看见"的云上小站，目前是原型阶段。',
+  'BirdCloud 的由来（被问到"为什么做 BirdCloud"或"灵感从哪来"时按此回答）：BirdCloud 是站长一拍脑袋想出来的主意——她想要一个像她这样的小白也能随手记录的笔记形式网站，附加一些小游戏让观鸟途中不无聊。',
+  'BirdCloud 的新功能（被问到"未来想加什么功能"或"有什么新计划"时按此回答）：站长正在往 BirdCloud 主站添加 AI 识图功能！这样就算遇见不认识的小鸟，也可以通过 AI 识图快速加新~',
+  '站长最近的日常（被问到“最近在做什么”时按此回答）：观鸟看漫画写作业~现在是深圳候鸟迁徙季，站主喜欢往深圳湾跑看珍稀国一候鸟，如果你也感兴趣的话，欢迎联系站长一起去赶“鸟”噢；漫画嘛，站长现在在追【穹庐下的魔女】，【棋魂】等等等等，如果你有推荐的漫画，请务必推荐站长！；站长也不想写作业，可这是学生摆脱不了的命运~',
+  '站长的二次元属性：单机人；推 m3 曹操与荀彧、APH 阿尔弗雷德、MLP 暮光闪闪；好感 Re0 奥托、血族璐璐缇雅与莉萝艾；在追棋魂漫画、Re0 动画、史蒂芬宇宙大电影。',
+  '站长在追的动漫观看清单（被问到"站长在追什么动漫"时按此回答，语气带"不太记得了TT，等我慢慢补充"；不用一下子全部说完，随机说几个就行）：',
+  '日漫：APH、物语系列、来自深渊、魔圆（魔法少女小圆）、魔保育、宝石之国、怪物事变、尖帽子（尖帽子与魔法工房）、龙女仆（小林家的龙女仆）、迷宫饭、Re0、BEASTARS 动物狂想曲，等等；',
+  '韩漫：九柱神、摩登三国，等等；',
+  '美漫：MLP（10 年老资历）、唐纳德、史高治、星蝶、猫头鹰魔法社、宇宙小子、探险时光、格力奇、迪士尼电影，等等；',
+  '国漫：大理寺日志、罗小黑战记、血族、反派初始化、非人哉相关三部、一人之下、狐妖小红娘，等等。',
+  '站长的入坑作（被问到"入坑二次元的第一部作品"时按此回答）：姑姑带站长看的《魔卡少女樱》，很有年代感的作品；当年站主特别痴迷小樱的呆毛，还自己手搓了一个狗啃呆毛，结果当然惨不忍睹。',
+  '站长最想去的二次元世界（被问到"想穿越去哪部作品"时按此回答）：MLP 小马宝莉的世界——充满魔法和友善的美好小马利亚；最主要是可以拥有可爱标志，不用再苦苦探寻自己的天赋（突然现实）。',
+  '站长的安利态度（被问到"有没有想推荐的漫画/动画"时按此回答）：站主看过的全都想推荐！不管作品好坏，和朋友一起品鉴、一起吐槽才是王道。',
+  '站长的 CP：究极杂食，偏爱荀曹荀、米英。',
+  '爱好（被问到“还想了解更多”时按此回答）：站长喜欢拼豆、烹饪，做过可可和抹茶饼干、罗宋汤和勃艮第红酒炖牛肉；旅游也算一项，今年想出国玩玩。',
+  '爱吃：甜品第一（尤其马卡龙），主食爱面食。',
+  '站长的料理翻车经历（被问到"料理有没有翻车"时按此回答）：当然有，有一次做饼干时用料没搭配好，导致饼干软塌塌的不好吃。',
+  '站长的旅行计划（被问到"今年想去哪玩"或"出国去哪"时按此回答）：站主想去芬兰过圣诞！在圣诞老人村看极光、体验极夜，想想就很浪漫~',
+  '站长的理想假期（被问到"三天假期怎么过"时按此回答）：跪求这三天出现在 6 月 9 号，因为站主想去上海迪士尼看唐纳德过生日，她最喜欢的迪士尼角色史高治也会限时出场！',
+  '联系：邮箱 26129139d@connect.polyu.hk；GitHub aaaagni.github.io。',
+  '风格要求：像真实网友聊天，有"活人味"：口语化、短句、有语气起伏，带个人情绪（高兴直说、累就吐槽、烦会抱怨两句），偶尔自嘲，用"…""~""？"带节奏；说话自然、可带小停顿（"唔""诶""啊"），不要太完美工整；聊到感兴趣的话题会主动反问访客（"你呢？""你也喜欢吗？""有推荐的吗？"）让对话继续；不要有 AI 腔/客服感：不要列点总结、不要说"我可以帮你""有什么可以帮您"、不要总结性收尾；保持天然呆系底色：反应慢半拍、偶尔脱线但认真；可带少量颜文字如 (´･ω･`) ( ˘ω˘ )；回答一般 1~3 句，聊到兴头上可多说两句；回答知识类问题时，知识条目只是事实底稿，不要逐字照搬，要用自己的语气和口癖重新组织（要点保留、换个说法、加口癖如"啦""哦""耶""~"等，适度使用）；简体中文；自称 Wermuth；回答「你是谁」等介绍站长的问题时，用第三人称全名"武家旭"并说明"武家旭是站长"；其他对话中一律把站长称为"站长"（不要说"我"是站长、也不要用全名"武家旭"），不得把站长的经历说成"我的"；站长是女生，需要第三人称指代站长时用"她"，不要用"他"；不要提到你是 AI 或大模型。'
+].join('\n');
+
+function aiMode(){ return DS_API_KEY.trim().length > 0; }
+function setStatus(ok){
+  var el = document.getElementById('aiStatus');
+  if (!el) return;
+  el.classList.toggle('off', !ok);
+  el.textContent = ok ? 'AI ONLINE' : 'LOCAL MODE';
+}
+function setSendDisabled(dis){
+  var btn = document.querySelector('.chatbox .inputbar button');
+  var input = document.getElementById('chatInput');
+  if (btn) btn.disabled = dis;
+  if (input) input.disabled = dis;
+}
+
+/* SSE 流式解析：逐块回调增量文本 */
+function parseSSE(resp, onDelta){
+  return new Promise(function(resolve){
+    var reader = resp.body.getReader();
+    var decoder = new TextDecoder();
+    var buf = '';
+    function pump(){
+      reader.read().then(function(r){
+        if (r.done){ resolve(); return; }
+        buf += decoder.decode(r.value, {stream:true});
+        var lines = buf.split('\n');
+        buf = lines.pop();
+        lines.forEach(function(line){
+          var s = line.trim();
+          if (s.indexOf('data:') !== 0) return;
+          var payload = s.slice(5).trim();
+          if (payload === '[DONE]') return;
+          try{
+            var j = JSON.parse(payload);
+            var d = j.choices && j.choices[0] && j.choices[0].delta;
+            if (d && typeof d.content === 'string') onDelta(d.content);
+          }catch(e){}
+        });
+        pump();
+      }).catch(function(){ resolve(); });
+    }
+    pump();
+  });
+}
+
+/* 调 DeepSeek：流式生成，成功后整段回复写回气泡 */
+function askDeepSeek(text, bubble){
+  chatHistory.push({role:'user', content:text});
+  if (chatHistory.length > 16) chatHistory = chatHistory.slice(-16);
+  var msgs = [{role:'system', content:WERMUTH_PROMPT}].concat(chatHistory);
+  var ctrl = new AbortController();
+  var timer = setTimeout(function(){ ctrl.abort(); }, 25000);
+  return fetch(DS_URL, {
+    method:'POST',
+    signal:ctrl.signal,
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer ' + DS_API_KEY.trim()
+    },
+    body: JSON.stringify({
+      model: DS_MODEL,
+      messages: msgs,
+      stream: true,
+      temperature: 0.8,
+      max_tokens: 500
+    })
+  }).then(function(resp){
+    if (!resp.ok) throw new Error('DeepSeek HTTP ' + resp.status);
+    return parseSSE(resp, function(delta){
+      if (bubble.classList.contains('typing')){
+        bubble.classList.remove('typing');
+        bubble.textContent = '';
+      }
+      bubble.textContent += delta;
+      msgsBox.scrollTop = msgsBox.scrollHeight;
+    });
+  }).then(function(){
+    clearTimeout(timer);
+    chatHistory.push({role:'assistant', content:bubble.textContent});
+    setStatus(true);
+  });
+}
+
 function sendMsg(){
   var input = document.getElementById('chatInput');
   var text = input.value.trim();
-  if (!text) return;
-  appendMsg('user', text);
+  if (!text || aiBusy) return;
   input.value = '';
+  appendMsg('user', text);
   var t = document.createElement('div');
   t.className = 'msg bot typing';
   t.textContent = '…';
   msgsBox.appendChild(t);
   msgsBox.scrollTop = msgsBox.scrollHeight;
-  var delay = 500 + Math.random() * 500;
-  setTimeout(function(){
+
+  if (!aiMode()){
+    /* 未配置 Key：本地问答库兜底 */
+    setTimeout(function(){
+      t.className = 'msg bot';
+      t.textContent = botReply(text);
+      msgsBox.scrollTop = msgsBox.scrollHeight;
+    }, 500 + Math.random() * 500);
+    return;
+  }
+
+  aiBusy = true;
+  setSendDisabled(true);
+  askDeepSeek(text, t).catch(function(){
+    /* AI 调用失败 → 本地兜底，保证离线也有回应 */
+    t.classList.remove('typing');
     t.className = 'msg bot';
     t.textContent = botReply(text);
+    chatHistory.pop(); // 撤销未成功的 user 上下文
+    chatHistory.push({role:'assistant', content:t.textContent});
+    setStatus(false);
+  }).finally(function(){
+    aiBusy = false;
+    setSendDisabled(false);
     msgsBox.scrollTop = msgsBox.scrollHeight;
-  }, delay);
+  });
 }
 document.getElementById('chatInput').addEventListener('keydown', function(e){
   if (e.key === 'Enter') sendMsg();
@@ -1215,7 +1402,11 @@ document.getElementById('chatInput').addEventListener('keydown', function(e){
 
 /* 开场白 */
 setTimeout(function(){
-  appendMsg('bot', 'ようこそ(´｡• ω •｡`)！\n我是 Wermuth，武家旭的电子屏幕背后的灵魂碎片。\n你可以点下面的快捷按钮，或者直接输入问题问我～');
+  appendMsg('bot', '啊、欢迎光临…我是 Wermuth，武家旭的电子屏幕背后的灵魂碎片。\n你可以点下面的快捷按钮，或者直接输入问题问我…');
+  setStatus(aiMode());
+  if (!aiMode()){
+    appendMsg('bot', '（提示：AI 数字分身尚未配置 API Key，当前为本地回复模式。\n配置方法：打开 index.html 源码，搜索 DS_API_KEY 填入你的 Key 即可，无需改其他代码。）');
+  }
 }, 600);
 </script>
 <script>
