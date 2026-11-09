@@ -1332,7 +1332,10 @@ function askDeepSeek(text, bubble){
       max_tokens: 500
     })
   }).then(function(resp){
-    if (!resp.ok) throw new Error('DeepSeek HTTP ' + resp.status);
+    if (!resp.ok){
+      if (resp.status === 402) throw new Error('API 余额不足，已退回本地问答库');
+      throw new Error('DeepSeek HTTP ' + resp.status);
+    }
     return parseSSE(resp, function(delta){
       if (bubble.classList.contains('typing')){
         bubble.classList.remove('typing');
@@ -1372,7 +1375,7 @@ function sendMsg(){
 
   aiBusy = true;
   setSendDisabled(true);
-  askDeepSeek(text, t).catch(function(){
+  askDeepSeek(text, t).catch(function(err){
     /* AI 调用失败 → 本地兜底，保证离线也有回应 */
     t.classList.remove('typing');
     t.className = 'msg bot';
@@ -1380,6 +1383,8 @@ function sendMsg(){
     chatHistory.pop(); // 撤销未成功的 user 上下文
     chatHistory.push({role:'assistant', content:t.textContent});
     setStatus(false);
+    var st = document.getElementById('aiStatus');
+    if (st && err && err.message) st.textContent = 'LOCAL MODE · ' + err.message;
   }).finally(function(){
     aiBusy = false;
     setSendDisabled(false);
